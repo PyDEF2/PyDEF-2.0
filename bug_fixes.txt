@@ -1,0 +1,5 @@
+30/05/18
+
+Chemical potentials: 
+division by 0 bug fix
+

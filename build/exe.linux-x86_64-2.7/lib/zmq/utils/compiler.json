@@ -1,0 +1,24 @@
+{
+  "extra_link_args": [], 
+  "define_macros": [
+    [
+      "HAVE_SYS_UN_H", 
+      1
+    ]
+  ], 
+  "runtime_library_dirs": [
+    "/home/adrien/anaconda2/lib"
+  ], 
+  "libraries": [
+    "zmq"
+  ], 
+  "library_dirs": [
+    "/home/adrien/anaconda2/lib"
+  ], 
+  "include_dirs": [
+    "/home/adrien/anaconda2/include", 
+    "zmq/utils", 
+    "zmq/backend/cython", 
+    "zmq/devices"
+  ]
+}

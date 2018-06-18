@@ -427,7 +427,7 @@ class ChemicalPotentials(object):
                 return C/a_X, False, ineq
             else:
                 print 'Warning! Division by zero avoided by ignoring one frontier!'
-                return 0, False, ''
+                return lambda x: 0, False, ''
 
 
 class PotentialsPlotParameters(pf.PlotParameters):

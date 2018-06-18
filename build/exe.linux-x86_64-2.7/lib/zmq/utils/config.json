@@ -1,0 +1,11 @@
+{
+  "have_sys_un_h": true, 
+  "bundle_msvcp": null, 
+  "allow_legacy_libzmq": true, 
+  "skip_check_zmq": false, 
+  "zmq_prefix": "/home/adrien/anaconda2", 
+  "bdist_egg": {}, 
+  "libzmq_extension": false, 
+  "no_libzmq_extension": true, 
+  "build_ext": {}
+}

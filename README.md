@@ -29,7 +29,7 @@ and launch main.py.
 
 ## Authors
 
-* **Adrien Stoliaroff**
+* **Mr. Adrien Stoliaroff**
 * **Dr. Stéphane Jobic**
 * **Dr. Camille Latouche**
 
