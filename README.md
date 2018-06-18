@@ -41,4 +41,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * Emmanuel Péan
 * CCIPL
+* Dr. Khang Hoang
+* Dr. Oleg Rubel
+* Dr. Michel Pavone
+* Dr. Isabelle Braems
+* Pr. Xavier Rocquefelte
+* Alicia Lecomte
+* Dr. Rémi Marchal
 * Dr. Julien Vidal
