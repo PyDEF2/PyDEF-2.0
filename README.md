@@ -39,7 +39,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
+Developer of version 1
 * Emmanuel Péan
+
+and also 
 * CCIPL
 * Dr. Khang Hoang
 * Dr. Oleg Rubel

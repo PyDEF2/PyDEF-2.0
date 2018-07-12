@@ -11,7 +11,7 @@ import numpy as np
 # GUI imports
 import Tkinter as tk
 from Tkinter import Tk, Frame, Menu, Button, Label
-from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, DISABLED, NORMAL
+from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, DISABLED, NORMAL, VERTICAL
 import tkFileDialog as fd
 import FileDialog # needed for cx_freeze compilation
 from PIL import Image, ImageTk
@@ -26,7 +26,8 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 from numpy import arange, sin, exp, pi
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #, NavigationToolbar2TkAgg
+from matplotlib.backends._backend_tk import NavigationToolbar2Tk #, NavigationToolbar2TkAgg
 # implement the default mpl key bindings
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
@@ -55,7 +56,7 @@ class Main_Window(tk.Tk):
 
     def todo(self):
             print 'Warning! Sorry, this feature has not been developped yet'
-    
+
     def __init__(self, dev=False):
         tk.Tk.__init__(self, className='PyDEF')
         self.geometry("{0}x{1}+0+0".format(self.winfo_screenwidth()-15, self.winfo_screenheight()))
@@ -75,7 +76,7 @@ class Main_Window(tk.Tk):
             self.last_import_dir = '.'
             self.last_export_dir = '.'
         else:
-            
+
             self.last_import_dir = '.'
             self.last_export_dir = '.'
         self.dev = dev
@@ -90,13 +91,13 @@ class Main_Window(tk.Tk):
                 name = self.projects_mem[pid]['name']
                 path = self.projects_mem[pid]['path']
                 self.load_project(pid)
-        
+
         try:
             self.last_import_dir = self.projects_mem['last_import_dir']
             self.last_export_dir = self.projects_mem['last_export_dir']
         except KeyError:
             pass
-            
+
         if len(self.projects.keys()) > 0:
             self.currentprojectid = list(self.projects.keys())[0]
         else:
@@ -165,58 +166,59 @@ class Main_Window(tk.Tk):
 
         exitButton = Button(self.toolbar, text='Exit', image=self.exiticon, compound=TOP, command=self.exit_pydef)
         exitButton.pack(side=LEFT, padx=2, pady=2)
-        
+
         if self.dev:
             checkButton = Button(self.toolbar, text='Check', command=self.check)
             checkButton.pack(side=LEFT, padx=2, pady=2)
 
         self.toolbar.pack(side = TOP, fill = X)
-        
-        self.def_stud_icon = ImageTk.PhotoImage(Image.open('Pictures/Icons/Defect_Study-50.png')) 
-        self.mat_stud_icon = ImageTk.PhotoImage(Image.open('Pictures/Icons/Material_Study-50.png')) 
-        self.mfig_icon = ImageTk.PhotoImage(Image.open('Pictures/Icons/Multiple_subplot_figure-50.png')) 
-        self.chem_pot_icon = ImageTk.PhotoImage(Image.open('Pictures/FigureIcons/StabilityDomain-50.png')) 
+
+        self.def_stud_icon = ImageTk.PhotoImage(Image.open('Pictures/Icons/Defect_Study-50.png'))
+        self.mat_stud_icon = ImageTk.PhotoImage(Image.open('Pictures/Icons/Material_Study-50.png'))
+        self.mfig_icon = ImageTk.PhotoImage(Image.open('Pictures/Icons/Multiple_subplot_figure-50.png'))
+        self.chem_pot_icon = ImageTk.PhotoImage(Image.open('Pictures/FigureIcons/StabilityDomain-50.png'))
 
         # -------------------------------------------- KEYBOARD SHORTCUTS  ----------------------------------------------
 
-        self.bind("<Control-Key-n>", lambda x:self.new_project()) 
+        self.bind("<Control-Key-n>", lambda x:self.new_project())
         self.bind("<Control-Key-s>", lambda x:self.save(save_all_projects=True))
-        self.bind("<Control-Key-w>", lambda event: self.close_current_viewed_pane()) 
-        self.bind("<Control-Key-q>", lambda event: self.exit_pydef()) 
-        self.bind("<Control-Key-i>", lambda event: self.importcalc()) 
-        self.bind("<Control-Key-o>", lambda event: self.load_pyd_file()) 
-        self.bind("<Control-Key-e>", lambda event: self.export()) 
-        self.bind("<Control-Key-a>", lambda event: self.about()) 
-        self.bind('<Escape>', lambda event: self.exit_pydef()) 
-        self.bind('<Delete>', lambda event: self.delete()) 
+        self.bind("<Control-Key-w>", lambda event: self.close_current_viewed_pane())
+        self.bind("<Control-Key-q>", lambda event: self.exit_pydef())
+        self.bind("<Control-Key-i>", lambda event: self.importcalc())
+        self.bind("<Control-Key-o>", lambda event: self.load_pyd_file())
+        self.bind("<Control-Key-e>", lambda event: self.export())
+        self.bind("<Control-Key-a>", lambda event: self.about())
+        self.bind('<Escape>', lambda event: self.exit_pydef())
+        self.bind('<Delete>', lambda event: self.delete())
 
         # -------------------------------------------- REST OF THE WINDOW  ----------------------------------------------
 
-        self.container = tk.Frame(self.master, bd = 2, bg = 'white', relief = RAISED)
+        self.container = tk.PanedWindow(self.master, bd = 2, bg = 'white', relief = RAISED, showhandle=True)
 
         # PROJECT MANAGEMENT
         self.project_management_panel = tk.Frame(self.container, bd = 2, bg = 'white', relief = RAISED)
         self.project_notebook = ttk.Notebook(master=self.project_management_panel)
         self.pm_pane = tk.Frame(self.project_notebook, bg = 'white', relief = RAISED)
-        self.pm = pm.ProjectsManager(self.pm_pane, self) 
+        self.pm = pm.ProjectsManager(self.pm_pane, self)
         treescrollb = tk.Scrollbar(self.pm_pane, command=self.pm.tree.yview)
         self.pm.tree['yscrollcommand'] = treescrollb.set
         treescrollb.pack(side='left', fill='y')
         self.pm.tree.pack(side='right', fill='both', expand=True)
-        
+
         self.fm_pane = tk.Frame(self.project_notebook, bg = 'white', relief = RAISED)
         self.fm = pm.FigureManager(self.fm_pane, self)
         fmtreescrollb = tk.Scrollbar(self.fm_pane, command=self.fm.tree.yview)
         self.fm.tree['yscrollcommand'] = fmtreescrollb.set
         fmtreescrollb.pack(side='left', fill='y')
         self.fm.tree.pack(side='right', fill='both', expand=True)
-        
+
         self.project_notebook.add(self.pm_pane, text='Projects')
         self.project_notebook.add(self.fm_pane, text='Figures')
         self.project_notebook.pack(fill='both', expand=True)
 
+        self.work_container = tk.PanedWindow(self.container, bd = 2, bg = 'white', relief = RAISED, showhandle=True, orient=VERTICAL)
         # WORK FRAME
-        self.work_frame = tu.CustomNotebook(master=self.container)
+        self.work_frame = tu.CustomNotebook(master=self.work_container)
 
         label1 = Label(self.work_frame).pack()
 
@@ -237,9 +239,9 @@ class Main_Window(tk.Tk):
         tutotext += 'Good work!\n'
         self.logo_full_name_transp_bg = ImageTk.PhotoImage(Image.open('Pictures/Welcome-small.png'))
         self.welcome_pane_lab = tk.Label(self.welcome_pane, image=self.logo_full_name_transp_bg, bg = 'white')
-        self.welcome_text=tk.Label(self.welcome_pane, text=welcomtext, 
+        self.welcome_text=tk.Label(self.welcome_pane, text=welcomtext,
         bg = 'white', font=("Courrier", 30))
-        self.welcome_pane_text=tk.Label(self.welcome_pane, text=tutotext, 
+        self.welcome_pane_text=tk.Label(self.welcome_pane, text=tutotext,
         bg = 'white', justify=LEFT, anchor='w', padx=20,  font=("Courrier", 16))
         self.welcome_pane_lab.pack(side=TOP, fill= BOTH, expand=True)
         self.welcome_text.pack(side=TOP, fill= BOTH, expand=True)
@@ -247,7 +249,7 @@ class Main_Window(tk.Tk):
         self.work_frame.add(self.welcome_pane, text='Tutorial')
 
         # Consol
-        self.consol = tk.Frame(self.container, bd = 2, bg = 'white', relief = RAISED)
+        self.consol = tk.Frame(self.work_container, bd = 2, bg = 'white', relief = RAISED)
         self.consolText = tk.Text(self.consol, relief = FLAT)
         self.consolText.insert(END, 'Welcome to PyDEF 2.0\n')
         self.consolText.config(font=("consolas", 12), wrap='word')
@@ -261,34 +263,29 @@ class Main_Window(tk.Tk):
 
         consolscrollb = tk.Scrollbar(self.consol, command=self.consolText.yview)
         self.consolText['yscrollcommand'] = consolscrollb.set
-        consolscrollb.grid(row = 0, column = 1, sticky = 'nsew', padx = 2)
+        consolscrollb.grid(row=0, column=1, sticky='nsew', padx=2)
 
-        self.consol.columnconfigure(0, weight = 50)
-        self.consol.columnconfigure(1, weight = 1)
-        self.consol.rowconfigure(0, weight = 1)
-        self.consol.rowconfigure(1, weight = 0)
+        self.consol.columnconfigure(0, weight=50)
+        self.consol.columnconfigure(1, weight=1)
+        self.consol.rowconfigure(0, weight=1)
+        self.consol.rowconfigure(1, weight=0)
 
         # Add the 3 panels above to container
-        self.project_management_panel.grid(row = 0, column = 0, rowspan = 2, sticky = 'nsew')
-        self.work_frame.grid(row = 0, column = 1, sticky = 'nsew')
-        self.consol.grid(row = 1, column = 1, sticky = 'nsew')
+        self.container.add(self.project_management_panel, sticky='nsew')
+        label = tk.Label(self.container, text='TEST')
+        self.work_container.add(self.work_frame, sticky='nsew', minsize=self.winfo_screenheight()*0.66)
+        self.work_container.add(self.consol, sticky='nsew')
+        self.container.add(self.work_container, sticky='nsew')
 
-        self.container.columnconfigure(0, weight = 1)
-        self.container.columnconfigure(1, weight = 5)
+        self.container.pack(side=TOP, fill=BOTH, expand=True)
 
-        self.container.rowconfigure(0, weight = 4, minsize=2.*self.winfo_screenheight()/3.)
-        self.container.rowconfigure(1, weight = 1) # Work area
-        self.container.rowconfigure(2, weight = 0)
-
-        self.container.pack(side = TOP, fill = BOTH, expand = True)
-        
         self.init = True
-    
+
     def check(self):
         # For Development only
         print 'check'
         print self.projects
-    
+
     def delete(self):
         self.pm.delete()
 
@@ -306,7 +303,7 @@ class Main_Window(tk.Tk):
     def export(self):
         project = self.projects[self.currentprojectid]
         def get_filename():
-            filename = fd.asksaveasfilename(parent = self, initialdir = self.last_export_dir, 
+            filename = fd.asksaveasfilename(parent = self, initialdir = self.last_export_dir,
             title = "Export", filetypes=[("Comma-Separated Values", "*.csv"), ("Tab-Separated Values", "*")])
             if filename.split('.')[-1] == 'csv':
                 separator = ','
@@ -316,10 +313,10 @@ class Main_Window(tk.Tk):
         if project.object_str_type(self.currentitemid) == 'cell':
             comparison=project.cells[self.currentitemid].gc is not None
             optical_indices = project.cells[self.currentitemid].optical_indices is not None
-            
+
             choicew = cw.CellExportWindow(self,comparison=comparison, optical_indices=optical_indices)
             choice = choicew.choice
-            self.wait_window(choicew) 
+            self.wait_window(choicew)
             filename, separator = get_filename()
             if len(filename) > 0:
                 if choice.get() == 'DoS':
@@ -330,7 +327,7 @@ class Main_Window(tk.Tk):
                     try:
                         project.cells[self.currentitemid].optical_indices.export(filename, separator)
                     except AttributeError:
-                        message = 'Warning! No optical indices in ' + project.cells[self.currentitemid].treetitle 
+                        message = 'Warning! No optical indices in ' + project.cells[self.currentitemid].treetitle
                         message += ' yet. Plot optical indices and retry please.'
                         print message
                 elif choice.get() == 'D':
@@ -348,7 +345,7 @@ class Main_Window(tk.Tk):
             choicew = msw.MaterialStudyExportWindow(self)
             choice = choicew.choice
             self.wait_window(choicew)
-            filename, separator = get_filename() 
+            filename, separator = get_filename()
             if len(filename) > 0:
                 mat_stud = project.material_studies[self.currentitemid]
                 if choice.get() == 'Defect Concentrations':
@@ -449,7 +446,7 @@ class Main_Window(tk.Tk):
             self.printerror(str(e))
         except KeyError:
             self.printerror('No Project! Please create a Project first')
-            
+
     def new_material_study(self):
         try:
             msw.MaterialStudyCreationWindow(self, self.projects[self.currentprojectid], None)
@@ -457,7 +454,7 @@ class Main_Window(tk.Tk):
             self.printerror(str(e))
         except KeyError:
             self.printerror('No Project! Please create a Project first')
-            
+
     def new_multiple_subplot_figure(self):
         msfcw.MultipleSubplotFigureCreationWindow(self)
 
@@ -472,10 +469,10 @@ class Main_Window(tk.Tk):
         except tk.TclError:
             pass
             # nothing to remove
-        
+
     def create_defect_study(self, new_defect_study):
         self.projects[self.currentprojectid].add_defect_study(new_defect_study)
-    
+
     def plot(self):
         """plot the default figure of the currently selected object in the work frame"""
         fig = None
@@ -513,13 +510,13 @@ class Main_Window(tk.Tk):
             panetitle = material_study.treetitle
             print 'Plot Defect Formation Energies of Material Study ' + panetitle
             fig = material_study.plot_formation_energy(fpp=material_study.lastfpp)
-        
+
         if fig is not None:
             frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
 
             figframe = self.fig_to_canvas(fig, frame)
             self.update_work_frame(frame, panetitle)
-    
+
     def plot_mfigure(self, mfigure):
         try:
             fig = mfigure.plot()
@@ -531,7 +528,7 @@ class Main_Window(tk.Tk):
             self.printerror(str(e))
         except ValueError, e:
             self.printerror(str(e))
-    
+
     def plot_optical_indices(self, opp=None):
         project = self.projects[self.currentprojectid]
         if project.object_str_type(self.currentitemid) == 'cell':
@@ -554,7 +551,7 @@ class Main_Window(tk.Tk):
             frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
             self.fig_to_canvas(fig, frame)
             self.update_work_frame(frame, cell.treetitle)
-    
+
     def plot_band_diagram(self):
         project = self.projects[self.currentprojectid]
         if project.object_str_type(self.currentitemid) == 'cell':
@@ -563,7 +560,7 @@ class Main_Window(tk.Tk):
             frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
             self.fig_to_canvas(fig, frame)
             self.update_work_frame(frame, cell.treetitle)
-    
+
     def fit_bands(self):
         project = self.projects[self.currentprojectid]
         if project.object_str_type(self.currentitemid) == 'cell':
@@ -595,7 +592,7 @@ class Main_Window(tk.Tk):
 
         self.fig_to_canvas(fig, frame)
         self.update_work_frame(frame, panetitle)
-        
+
     def plot_defect_concentrations(self, code=0):
         """code: 0 for Defect Concentrations, 1 for Charge Carriers concentration and 2 for E_F"""
         if code in [0,1,2]:
@@ -616,25 +613,25 @@ class Main_Window(tk.Tk):
                         fig = material_study.defect_concentrations.plot(pp=material_study.eftpp)
                     frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
                     self.fig_to_canvas(fig, frame)
-                    panetitle = material_study.treetitle + ' dc' 
+                    panetitle = material_study.treetitle + ' dc'
                     self.update_work_frame(frame, panetitle)
                 except bf.PyDEFSolveError, e:
                     self.printerror(str(e))
                 except TypeError, e:
                    self.printerror('Unknown number of sites for the defects! Please specify the number of sites for each defect')
                 except AttributeError, e:
-                    message = 'Please specify a DOSCAR file for each calculation in Material Study ' + material_study.treetitle 
+                    message = 'Please specify a DOSCAR file for each calculation in Material Study ' + material_study.treetitle
                     message += ' as it is mandatory for Concentrations Calculations'
                     self.printerror(message)
-    
+
     def fig_to_canvas(self, fig, frame):
-        
+
         self.mem = None
-        
+
         def on_pick(event):
             picked_obj = event.artist
             self.mem = picked_obj
-        
+
         def on_move(event):
             if self.mem is not None:
                 if type(self.mem) == matplotlib.legend.Legend:
@@ -652,12 +649,12 @@ class Main_Window(tk.Tk):
                         canvas.draw()
                     except TypeError:
                         pass
-        
+
         def on_release(event):
             self.mem = None
-        
+
         def on_scroll(event):
-            
+
             xmin, xmax = event.inaxes.get_xlim()
             ymin, ymax = event.inaxes.get_ylim()
             if event.step > 0:
@@ -670,25 +667,49 @@ class Main_Window(tk.Tk):
                 canvas.draw()
             except TypeError:
                 pass
-        
-        canvas = FigureCanvasTkAgg(fig, master=frame)
-        canvas.show()
+
+        figure_frame = Frame(frame)
+        toolbar_frame = Frame(frame)
+
+        # frame.rowconfigure(0, weight = 5)
+        # frame.rowconfigure(1, weight = 1)
+
+        self.update()
+        c_height = self.container.winfo_height()
+        c_width = self.container.winfo_width()
+
+        print 'h %s '%c_height
+        print 'w %s ' %c_width
+
+        pix_per_inch = self.winfo_fpixels('1i')
+        fig.set_size_inches(c_width/pix_per_inch,0.7*c_height/pix_per_inch)
+        print fig.get_size_inches()
+        canvas = FigureCanvasTkAgg(fig, master=figure_frame)
+        canvas.draw()
         canvas.mpl_connect('pick_event', on_pick)
         canvas.mpl_connect('motion_notify_event', on_move)
         canvas.mpl_connect('button_release_event', on_release)
         canvas.mpl_connect('scroll_event', on_scroll)
-        canvas.get_tk_widget().pack(side=TOP, fill= BOTH, expand=1)
-        self.ctoolbar = NavigationToolbar2TkAgg(canvas, frame)
+        # canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=False)
+        # canvas.get_tk_widget().grid(row=0,  sticky='nsew')
+        # self.ctoolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+        self.ctoolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
         self.ctoolbar.update()
-        canvas._tkcanvas.pack(side=TOP, fill= BOTH, expand=True)
+        canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=False)
+        # canvas._tkcanvas.grid(row=0,  sticky='nsew')
+        # figure_frame.grid(row=0,  sticky='nsew')
+        # toolbar_frame.grid(row=1,  sticky='nsew')
+        figure_frame.pack(side=TOP, fill=BOTH, expand=False)
+        toolbar_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
+        # HERE
 
-    
+
     def load_project(self, pid):
         try:
             projectpath = self.projects_mem[pid]['path']
             if projectpath.split('.')[-1] != 'pyd':
                 print 'Warning! Are you sure this project was saved correctly? The file\'s extension is not *.pyd.'
-            with open(projectpath, "rb") as f:    
+            with open(projectpath, "rb") as f:
                 self.projects[pid] = pickle.load(f)
                 self.projects[pid].mainwindow = self
                 self.projects[pid].pid = pid
@@ -705,12 +726,12 @@ class Main_Window(tk.Tk):
             else:
                 print '!!!Error!!! Error while reading saved *.pyd file.'
 
-    
+
     def save_project(self, project):
         if project.pid in self.projects_mem.keys() and self.projects_mem[project.pid]['path'] is not None:
             projectpath = self.projects_mem[project.pid]['path']
         else:
-           projectpath = "./Save-Projects/" + project.name.replace(' ', '_') + "_" + str(np.random.randint(0, sys.maxint)) + ".pyd" 
+           projectpath = "./Save-Projects/" + project.name.replace(' ', '_') + "_" + str(np.random.randint(0, sys.maxint)) + ".pyd"
            # The random integer here is to ensure unicity of the path in case users want to exchange *.pyd files
         if len(project.mfigures.values()) > 0:
             for mfig in project.mfigures.values():
@@ -722,8 +743,8 @@ class Main_Window(tk.Tk):
         self.projects_mem[project.pid] = {'name': project.name, 'path': projectpath}
         self.projects_mem['last_import_dir'] = self.last_import_dir
         self.projects_mem['last_export_dir'] = self.last_export_dir
-        
-        
+
+
     def load_mem(self):
         try:
             with open("./Save-Projects/PyDEF_memory.pyd", "rb") as f:
@@ -734,8 +755,8 @@ class Main_Window(tk.Tk):
         except IOError, e:
             print 'Warning! No PyDEF memory found. '
             return {}
-    
-    
+
+
     def save(self, save_all_projects=False):
         if save_all_projects:
             for project in self.projects.values():
@@ -746,15 +767,15 @@ class Main_Window(tk.Tk):
             print 'Project ' + self.projects[self.currentprojectid].name + ' saved successfully!'
         with open("./Save-Projects/PyDEF_memory.pyd", "wb") as f:
             pickle.dump(self.projects_mem, f, pickle.HIGHEST_PROTOCOL)
-    
-    
+
+
     def load_pyd_file(self):
         try:
             path = fd.askopenfilenames(parent=self, initialdir=self.last_import_dir,title="Import *.pyd file")[0]
             if path.split('.')[-1] != 'pyd':
                 print 'Warning! Are you sure this project was saved correctly? The file\'s extension is not *.pyd.'
             pid = self.new_project_key()
-            with open(path, "rb") as f:    
+            with open(path, "rb") as f:
                 self.projects[pid] = pickle.load(f)
                 self.projects[pid].mainwindow = self
                 self.projects_mem[pid] = {'name': self.projects[pid].name, 'path': path}
@@ -768,10 +789,10 @@ class Main_Window(tk.Tk):
         except IndexError:
             # The user has closed the FileDialog window
             pass
-    
+
     def about(self):
         AboutPyDEF(self)
-    
+
     def new_project_key(self):
         if len(self.projects.keys()) + 1 <10:
             return 'P0' + str(len(self.projects.keys()) + 1)
@@ -788,7 +809,7 @@ class AboutPyDEF(tk.Toplevel):
 
         self.main_frame = tk.Frame(self)
         self.main_frame.grid(sticky='nsew')
-        
+
         tk.Label(self.main_frame, image=self.mainwindow.logo_full_name_transp_bg, bg = 'white').grid(row=0, column=0, sticky='nsew')
         info_pane = tk.Frame(self.main_frame, bg='white')
         tk.Label(info_pane, text='version 64-bit', bg='white', padx=10).grid()
@@ -797,7 +818,7 @@ class AboutPyDEF(tk.Toplevel):
         notebook = ttk.Notebook(master=self.main_frame)
         license_pane = tk.Frame(notebook)
         credits_pane = tk.Frame(notebook)
-        developers = 'Developers: Adrien Stoliaroff, Emmanuel Pean'
+        developers = 'Developers: Adrien Stoliaroff'
         authors = 'On an original idea of Dr. Stephane Jobic and Dr. Camille Latouche'
         acknowledgments = 'If you use this software in a scientific publication'
         acknowledgments += ', please quote the following article:'
@@ -811,12 +832,12 @@ class AboutPyDEF(tk.Toplevel):
         notebook.add(license_pane, text='License')
         notebook.add(credits_pane, text='Credits')
         notebook.grid(sticky='nsew', columnspan=2)
-        
+
         tk.Button(self.main_frame, text='OK', command=self.destroy).grid(columnspan=2, sticky='e')
 
 
 class SaveBeforeExitWindow(tk.Toplevel):
-    
+
     def __init__(self, mainwindow):
         tk.Toplevel.__init__(self, mainwindow)
         self.resizable(False, False)
@@ -824,16 +845,16 @@ class SaveBeforeExitWindow(tk.Toplevel):
 
         self.main_frame = tk.Frame(self)
         self.main_frame.grid(sticky='nsew')
-        
+
         tk.Label(self.main_frame, image=self.mainwindow.logo_full_name_transp_bg, bg = 'white').grid(sticky='nsew')
         tk.Label(self.main_frame, text='Saving projects...').grid(sticky='nsew')
-        
-        
+
+
 class IORedirector(object):
     '''A general class for redirecting I/O to this Text widget.'''
     def __init__(self, text_area):
         self.text_area = text_area
-        
+
 
 class StdoutRedirector(IORedirector):
     '''A class for redirecting stdout to this Text widget.'''
