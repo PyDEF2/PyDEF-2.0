@@ -1,12 +1,3 @@
-"""
-    Defect study module
-    version: 1.0.0
-    author: Emmanuel Pean
-    e-mail: emmanuel.pean@gmail.com
-    revised: Adrien Stoliaroff
-    e-mail: adrien.stoliaroff@cnrs-imn.fr
-"""
-
 import numpy as np
 import scipy.optimize as sco
 import matplotlib.patches as patches
@@ -554,18 +545,24 @@ class MaterialStudy(object):
         int(defcellstudy.defect_cell.charge),
         ' %.5f' % defcellstudy.defect_cell.total_energy,
         ' %.5f' % defcellstudy.vbm_corr,
+        ' %.5f' % defcellstudy.pa_corr,
         ' %.5f' % defcellstudy.phs_corr[0],
         ' %.5f' % defcellstudy.phs_corr[1],
         ' %.5f' % defcellstudy.mp_corr,
+        ' %.5f' % defcellstudy.mb_corr[0],
+        ' %.5f' % defcellstudy.mb_corr[1],
         ' %.5f' % defcellstudy.tot_corr] for study in ds for defcellstudy in study.dcs]
         return [['Defect Study', 
         'Defect cell', 
         'q', 
         'Cell energy (eV)',
         'VBM corr (eV)', 
+        'PA corr (eV)', 
         'PHS corr h (eV)', 
         'PHS corr e- (eV)',
-        'Makov-Payne corr (eV)',
+        'MP corr (eV)',
+        'MB corr h (eV)',
+        'MB corr e (eV)',
         'Total corr (eV)']] + summary
         
 

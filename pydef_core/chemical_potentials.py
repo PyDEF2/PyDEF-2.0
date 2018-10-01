@@ -95,7 +95,7 @@ class ChemicalPotentials(object):
             a_X, a_Y, C = self.calculateInequationCoeffs(nonSynCell, stoechratios_list, chem_pot_dict)
             # print 'a_X, a_Y, C: ' + str(a_X) + ";" + str(a_Y) + ";" + str(C)
             frontier, aboveStabDom, ineq = self.defineDomain(self.lastppp.mu_X_axis, self.lastppp.mu_Y_axis, a_X, a_Y, C)
-            frontierList.append([nonSynCell.display_rname, frontier, aboveStabDom])
+            frontierList.append([nonSynCell.display_rname, nonSynCell.ID, frontier, aboveStabDom])
             self.lastppp.domainInequationsList.append(ineq + " (Competition with " + nonSynCell.rname + ")")
         
         if self.synth_population == 2:
@@ -138,7 +138,7 @@ class ChemicalPotentials(object):
     
     def plot1D(self, ax, ppp, frontierList, delta):
         """:param  ppp: PotentialsPlotParameters
-        :param frontierList: list of 3-elements lists: frontier functions, competing compound name, above/under stability domain boolean
+        :param frontierList: list of 4-elements lists: competing compound display name, compound ID, frontier functions, above/under stability domain boolean
         :param ax: matplotlib ax object
         :param delta: boolean (for the text of the axis)"""
 
@@ -148,18 +148,18 @@ class ChemicalPotentials(object):
         mu_Y_axis = ppp.mu_Y_axis
         colorList = ppp.colorList
         
-        xfrontiers = [item[1](0) for item in frontierList]
+        xfrontiers = [item[2](0) for item in frontierList]
         
-        for name, frontier, aboveStabDom in frontierList:
+        for name, ID, frontier, aboveStabDom in frontierList:
             if aboveStabDom:
-                xfrontiersabove.append([name,frontier(0)])
+                xfrontiersabove.append([name,ID,frontier(0)])
             else:
-                xfrontiersunder.append([name,frontier(0)])
-        stabdomainl = max(xfrontiersunder, key=lambda x: x[1])[1]
-        stabdomainr = min(xfrontiersabove, key=lambda x: x[1])[1]
+                xfrontiersunder.append([name,ID,frontier(0)])
+        stabdomainl = max(xfrontiersunder, key=lambda x: x[2])[2]
+        stabdomainr = min(xfrontiersabove, key=lambda x: x[2])[2]
         
-        xfrontiersunder.sort(key=lambda x: x[1])
-        xfrontiersabove.sort(key=lambda x: x[1], reverse = True)
+        xfrontiersunder.sort(key=lambda x: x[2])
+        xfrontiersabove.sort(key=lambda x: x[2], reverse = True)
         
         xmin = min(xfrontiers) - 1
         xmax = 0
@@ -170,16 +170,16 @@ class ChemicalPotentials(object):
         # Draw domains under the stability domain of the studied compound
         length = len(xfrontiersunder)
         for i in range(length):
-            self.draw1Ddomain(ax, meml, xfrontiersunder[i][1], 2, xmin, xmax, xfrontiersunder[i][0], False, ppp.colors[xfrontiersunder[i][0]])
-            meml = xfrontiersunder[i][1]
+            self.draw1Domain(ax, meml, xfrontiersunder[i][2], 2, xmin, xmax, xfrontiersunder[i][0], False, ppp.colors[xfrontiersunder[i][1]])
+            meml = xfrontiersunder[i][2]
         
         # Draw domains above the stability domain of the studied compound
         length = len(xfrontiersabove)
         for i in range(length):
-			self.draw1Ddomain(ax, xfrontiersabove[i][1], memr, 2, xmin, xmax, xfrontiersabove[i][0], False, ppp.colors[xfrontiersabove[i][0]])
-			memr = xfrontiersabove[i][1]
+			self.draw1Domain(ax, xfrontiersabove[i][2], memr, 2, xmin, xmax, xfrontiersabove[i][0], False, ppp.colors[xfrontiersabove[i][1]])
+			memr = xfrontiersabove[i][2]
         # Stability domain
-        self.draw1Ddomain(ax, stabdomainl, stabdomainr, 2, xmin, xmax, self.synthesized.display_rname, ppp.hashed, 'white')
+        self.draw1Domain(ax, stabdomainl, stabdomainr, 2, xmin, xmax, self.synthesized.display_rname, ppp.hashed, 'white')
         self.domainSummits = np.array([stabdomainl, stabdomainr])
         
         if delta:    
@@ -188,7 +188,7 @@ class ChemicalPotentials(object):
             ax.set_xlabel('$\mu_{%s} (eV)$' % mu_Y_axis, fontsize=ppp.fontsize)
         
         
-    def draw1Ddomain(self, ax, xl, xr, height, xmin, xmax, compoundName, hashed, color):
+    def draw1Domain(self, ax, xl, xr, height, xmin, xmax, compoundName, hashed, color):
         if hashed == True :
             h = "/"
         else:
@@ -220,7 +220,7 @@ class ChemicalPotentials(object):
         # determine ymin, ymax
         if ppp.autoscale:
             extrval = []
-            for name, frontier, aboveStabDomain in frontierList:
+            for name, ID, frontier, aboveStabDomain in frontierList:
                 try:
                     extrval.append(frontier(ppp.xmin))
                     extrval.append(frontier(ppp.xmax))
@@ -236,8 +236,8 @@ class ChemicalPotentials(object):
         lf = len(frontierList)
         crossingPoints = []
 
-        for name1, frontier1, aboveStabDomain1 in frontierList:
-            for name2, frontier2, aboveStabDomain2 in frontierList[k+1:lf]:
+        for name1, ID1, frontier1, aboveStabDomain1 in frontierList:
+            for name2, ID2, frontier2, aboveStabDomain2 in frontierList[k+1:lf]:
                 try:
                     crossPt = self.get_lines_crossing_point(frontier1, frontier2, ppp.xmin, ppp.xmax)
                     crossingPoints.append(crossPt)
@@ -261,26 +261,26 @@ class ChemicalPotentials(object):
         # plot forbidden domains
         k = 0
         legendList = []
-        for name, frontier, aboveStabDomain in frontierList:
+        for name, ID, frontier, aboveStabDomain in frontierList:
             yfrontierPoints = []
-            key = name.replace('_','').replace('{', '').replace('}','')
+            # key = name.replace('_','').replace('{', '').replace('}','')
             try:
                 for x in X_axis_sampling:
                     yfrontierPoints.append(frontier(x))
                 ax.plot(X_axis_sampling, yfrontierPoints, '-', color='black')
                 if aboveStabDomain:
-                    ax.fill_between(X_axis_sampling, yfrontierPoints, ppp.ymax, alpha=0.5, facecolor=colors[key])
+                    ax.fill_between(X_axis_sampling, yfrontierPoints, ppp.ymax, alpha=0.5, facecolor=colors[ID])
                 else:
-                    ax.fill_between(X_axis_sampling, ppp.ymin, yfrontierPoints, alpha=0.5, facecolor=colors[key])
+                    ax.fill_between(X_axis_sampling, ppp.ymin, yfrontierPoints, alpha=0.5, facecolor=colors[ID])
             except TypeError:
                 # vertical frontier is a float, not a function
                 ax.plot([frontier, frontier], [ppp.ymin, ppp.ymax], '-', color='black')
                 if aboveStabDomain:
-                    ax.fill_between([frontier, ppp.xmax], ppp.ymin, [ppp.ymax, ppp.ymax], alpha=0.5, facecolor=colors[key])
+                    ax.fill_between([frontier, ppp.xmax], ppp.ymin, [ppp.ymax, ppp.ymax], alpha=0.5, facecolor=colors[ID])
                 else:
-                    ax.fill_between([ppp.xmin, frontier], ppp.ymin, [ppp.ymax, ppp.ymax], alpha=0.5, facecolor=colors[key])
+                    ax.fill_between([ppp.xmin, frontier], ppp.ymin, [ppp.ymax, ppp.ymax], alpha=0.5, facecolor=colors[ID])
             
-            legendList.append(patches.Patch(color=colors[key], alpha=0.5, label='$' + name + '$')) 
+            legendList.append(patches.Patch(color=colors[ID], alpha=0.5, label='$' + name + '$')) 
             k +=1
         
         if ppp.display_summits:
@@ -321,7 +321,7 @@ class ChemicalPotentials(object):
         k = 0
         length = len(frontierList)
         while res and k < length:
-            name, frontier, aboveStabDomain = frontierList[k]
+            name, ID, frontier, aboveStabDomain = frontierList[k]
             if aboveStabDomain:
                 try:
                     res = pt[1] <= frontier(pt[0]) + 0.01
@@ -427,7 +427,6 @@ class ChemicalPotentials(object):
                 return C/a_X, False, ineq
             else:
                 print 'Warning! Division by zero avoided by ignoring one frontier!'
-                return lambda x: 0, False, ''
 
 
 class PotentialsPlotParameters(pf.PlotParameters):
@@ -456,7 +455,7 @@ class PotentialsPlotParameters(pf.PlotParameters):
         
         self.colorList = ['red', 'blue', 'green', 'yellow', 'orange', 'aqua', 'magenta', 'olive' ]
         
-        self.colors = dict(zip([cell.rname for cell in chem_pot.non_synthesized.values()], self.colorList))
+        self.colors = dict(zip([cell.ID for cell in chem_pot.non_synthesized.values()], self.colorList))
         
         self.title = 'Stability domain of $' +  chem_pot.synthesized.display_rname + '$' # Title of the plot
         self.hashed = True

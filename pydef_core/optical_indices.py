@@ -67,7 +67,7 @@ class OpticalIndices(object):
             data_label = self.components_dict[data_id]
             return data, data_label, self.quantities, self.quantities_labels
 
-    def export(self, filename, separator):
+    def export(self, filename, separator, data_id):
         
         data_ex = [self.energy]
         names_ex = ['E (eV)']
@@ -120,7 +120,7 @@ class OpticalIndices(object):
                         np.insert(tr,0,tr[0]), 
                         color=opp.colors[tensorid]['XX'], label=label, lw=3)
                     else:
-                        # n, k, R
+                        # n,k,r
                         eps1, eps1_label, names1, labels1 = self.get_data('epsilon 1')
                         eps1 = dict(zip(labels1, eps1))
                         ep1 = (eps1['XX'][0] + eps1['YY'][0] + eps1['ZZ'][0])/3.
@@ -132,14 +132,14 @@ class OpticalIndices(object):
                         n = np.sqrt(ep1 + np.sqrt(ep1**2 + ep2**2)) / np.sqrt(2)
                         k = np.sqrt(-ep1 + np.sqrt(ep1**2 + ep2**2)) / np.sqrt(2)
                         r = ((n-1)**2+k**2)/((n+1)**2+k**2)
-                        val = {'n':n, 'k':k, 'R': R}
+                        val = {'n':n, 'k':k, 'R': r}
                         
                         ax.plot(np.insert(opp.h_shift + self.energy, 0, 0), 
                         np.insert(tr,0,val[tensorid]), 
-                        color=opp.colors[tensorid]['XX'], label=label, lw=3)
+                        color=opp.colors[tensorid]['XX'], label=label, lw=opp.lw)
                 else:
                     ax.plot(self.energy, (data_dict['XX'] + data_dict['YY'] + data_dict['ZZ'])/3., 
-                    color=opp.colors[tensorid]['XX'], label=label, lw=3)
+                    color=opp.colors[tensorid]['XX'], label=label, lw=opp.lw)
             else:
                 key_to_label = dict(key_init_list)
                 for key1 in key_to_label.keys():
@@ -171,7 +171,7 @@ class OpticalIndices(object):
                     if tensorid.find('epsilon') > -1:
                         lines = [ax.plot(np.insert(opp.h_shift + self.energy, 0, 0), np.insert(data_dict[key],0,data_dict[key][0]), label=key_to_label[key], color=opp.colors[tensorid][key], lw=3) for key in key_to_label if key in keylist] 
                     else:
-                        # n, k, R
+                        # n,k,r
                         eps1, eps1_label, names1, labels1 = self.get_data('epsilon 1')
                         eps1 = dict(zip(labels1, eps1))
                         
@@ -185,7 +185,7 @@ class OpticalIndices(object):
                         def r(key):
                             return ((n(key)-1)**2+k(key)**2)/((n(key)+1)**2+k(key)**2)
                             
-                        val = {'n':n, 'k':k, 'R': R}
+                        val = {'n':n, 'k':k, 'R': r}
                         
                         lines = [ax.plot(np.insert(opp.h_shift + self.energy, 0, 0), np.insert(data_dict[key],0,val[tensorid](key)), label=key_to_label[key], color=opp.colors[tensorid][key], lw=3) for key in key_to_label if key in keylist] 
                 else:
@@ -203,6 +203,7 @@ class OpticalIndices(object):
         
     def plot(self, pp=None, ax=None):
         if pp is None:
+            print 'Default Opp'
             self.lastopp = OpticalPlotParameters(self)
             tensors = self.lastopp.data_id
         
@@ -265,7 +266,7 @@ def extract_rpa(content):
 
 
 def get_nkr(eps1, eps2):
-    """ Calculate n, k and R from epsilon 1 & 2 """
+    """ Calculate n, k and r from epsilon 1 & 2 """
 
     n = np.sqrt(eps1 + np.sqrt(eps1**2 + eps2**2)) / np.sqrt(2)
     k = np.sqrt(-eps1 + np.sqrt(eps1**2 + eps2**2)) / np.sqrt(2)
@@ -286,6 +287,7 @@ class OpticalPlotParameters(pf.PlotParameters):
         self.title = 'Optical indices'
         self.x_label = 'E (eV)'
         self.y_label = 'Optical indices'
+        self.lw = 3
         self.xmin = np.min(optical_indices.energy)
         self.xmax = np.max(optical_indices.energy)
         temp = [optical_indices.get_data(tensorid)[0] for tensorid in self.data_id]
