@@ -254,7 +254,7 @@ class ChemicalPotentials(object):
                 ppp.xmin, ppp.xmax = min(domainSummitsX) - 0.5, max(domainSummitsX) + 0.5
                 ppp.ymin, ppp.ymax = min(domainSummitsY) - 0.5, max(domainSummitsY) + 0.5
             except ValueError, e:
-                raise ValueError(host.rname + ' Stability Domain Plot: \nNo Domain Summit found in proposed range! You may try a larger range.')
+                raise ValueError(self.synthesized.rname + ' Stability Domain Plot: \nNo Domain Summit found in proposed range! You may try a larger range.')
         
         X_axis_sampling = np.linspace(ppp.xmin, ppp.xmax, 1000)
         
@@ -427,6 +427,7 @@ class ChemicalPotentials(object):
                 return C/a_X, False, ineq
             else:
                 print 'Warning! Division by zero avoided by ignoring one frontier!'
+                return lambda x: 0, False, ''
 
 
 class PotentialsPlotParameters(pf.PlotParameters):

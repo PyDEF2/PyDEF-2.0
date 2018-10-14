@@ -1221,7 +1221,9 @@ def get_system_name(atoms_types, nb_atoms, reduced):
     name = ''
     name_display = ''  # name for display in matplotlib
 
-    for f, g in zip(nb_atoms, atoms_types):
+    atoms_list = zip(nb_atoms, atoms_types)
+    atoms_list.sort(key=lambda x: x[0])
+    for f, g in atoms_list:
         if f != 1:
             name += g + str(f)
             name_display += g + '_{' + str(f) + '}'

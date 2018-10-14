@@ -5,7 +5,11 @@ It is a post-treatment software for ab-initio calculations performed
 with the Vienna Ab-Initio Simulation Package (VASP) 
 featuring a user-friendly Graphical User Interface (GUI). 
 
-See publication
+See publications
+
+Stoliaroff, A.; Jobic S.; Latouche, C. PyDEF 2.0: An easy to use Post-treatment
+Software for Publishable Charts featuring a Graphical User Interface. Journal
+of Computational Chemistry 2018, DOI 10.1002/jcc.25543
 
 Péan, E.; Vidal, J.; Jobic, S.; Latouche, C. Presentation of the PyDEF post-treatment
 Python software to compute publishable charts for defect energy formation. Chemical
