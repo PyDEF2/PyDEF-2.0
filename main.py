@@ -678,12 +678,12 @@ class Main_Window(tk.Tk):
         c_height = self.container.winfo_height()
         c_width = self.container.winfo_width()
 
-        print 'h %s '%c_height
-        print 'w %s ' %c_width
+        # print 'h %s '%c_height
+        # print 'w %s ' %c_width
 
         pix_per_inch = self.winfo_fpixels('1i')
-        fig.set_size_inches(c_width/pix_per_inch,0.7*c_height/pix_per_inch)
-        print fig.get_size_inches()
+        fig.set_size_inches(0.8*c_width/pix_per_inch,0.65*c_height/pix_per_inch)
+        # print fig.get_size_inches()
         canvas = FigureCanvasTkAgg(fig, master=figure_frame)
         canvas.draw()
         canvas.mpl_connect('pick_event', on_pick)
@@ -701,7 +701,6 @@ class Main_Window(tk.Tk):
         # toolbar_frame.grid(row=1,  sticky='nsew')
         figure_frame.pack(side=TOP, fill=BOTH, expand=False)
         toolbar_frame.pack(side=BOTTOM, fill=BOTH, expand=True)
-        # HERE
 
 
     def load_project(self, pid):

@@ -150,7 +150,9 @@ class DefectStudyCreationWindow(tk.Toplevel):
             elif self.step == 2:
                 
                 if self.defect_corrections_frame.host_cell_b_var.get() != 'None':
-                    host_cell_b = self.project.cells[self.defect_corrections_frame.host_cell_b_var.get()]
+                    host_cell_b_treetitle = self.defect_corrections_frame.host_cell_b_var.get()
+                    host_cell_b_id = [cell.ID for cell in self.project.cells.values() if cell.treetitle == host_cell_b_treetitle][0]
+                    host_cell_b = self.project.cells[host_cell_b_id]
                 else:
                     host_cell_b = self.project.cells[self.project.hostcellid]
                 geometry = self.defect_corrections_frame.geometry_var.get()
@@ -555,7 +557,7 @@ class DefectStudyCreationFrame(object):
 
         # Variables
         self.defect_study_id_var = tk.StringVar()  # Defect Study ID
-        self.host_cell_var = tk.StringVar()  # Host cell ID
+        # self.host_cell_var = tk.StringVar()  # Host cell ID
         self.defects_var = tk.StringVar()  # Defects IDs (separated with a comma)
         self.gaps_var = tk.StringVar()  # gaps separated with a comma/semicolon ?
         self.defect_study_id_var.set('automatic')
@@ -698,7 +700,7 @@ class DefectStudyCorrectionsFrame(object):
         def treetitle_if_not_host(cell):
             if cell.ID != project.hostcellid: 
                 return cell.treetitle
-        host_cell_b_list = [treetitle_if_not_host(d) for d in self.project.unboundcells.values()]
+        host_cell_b_list = [treetitle_if_not_host(d) for d in self.project.unboundcells.values() if treetitle_if_not_host(d) is not None]
         self.host_cell_b_ccb = ttk.Combobox(self.gap_corr_frame, values=host_cell_b_list,
                                             textvariable=self.host_cell_b_var, state='readonly') # , values=self.project.Cells.keys() + ['None']
         self.host_cell_b_var.set('None')
@@ -735,8 +737,8 @@ class DefectStudyCorrectionsFrame(object):
             self.defect_study.phs_correction=self.phs_corr_var.get()
             self.defect_study.mp_correction=self.mp_corr_var.get()
             try:
-                host_cell = self.project.Cells[self.host_cell_var.get()]
-                host_cell_b = self.project.Cells[self.host_cell_b_var.get()]
+                host_cell = self.project.cells[self.project.hostcellid]
+                host_cell_b = self.project.cells[self.host_cell_b_var.get()]
 
                 de_vbm = host_cell_b.VBM - host_cell.VBM
                 de_cbm = host_cell_b.CBM - host_cell.CBM
