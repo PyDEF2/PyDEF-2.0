@@ -1,5 +1,5 @@
 """
-    Project Manager in PyVALENCE GUI
+    Project Manager in PyDEF GUI
     version:
     author: Adrien Stoliaroff
     email: adrien.stoliaroff@cnrs-imn.fr
@@ -14,7 +14,7 @@ import tkMessageBox as mb
 
 import sys
 
-# PyVALENCE imports
+# PyDEF imports
 import cell_windows as cw
 import chemical_potentials_windows as cpw
 import defect_study_creation_window as dscw
@@ -663,6 +663,16 @@ class ProjectsManager(object):
     
     def delete_proj(self, project_id):
         self.tree.delete(self.mem[project_id]['proj'])
+    
+    def check_tree(self):
+        # print
+        for proj in self.mainwindow.projects.values():
+            print '\n\nproject %s: %s'%(proj.pid, proj.name)
+            print '\thost cell %s'%proj.cells[proj.hostcellid]
+            print '\tcells %s'%proj.cells.keys()
+            print '\tdefects %s'%proj.defects.keys()
+            print '\tdefect_studies %s'%proj.defect_studies.keys()
+            print '\tmaterial_studies %s'%proj.material_studies.keys()
 
 
 class FigureManager(object):

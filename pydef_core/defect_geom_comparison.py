@@ -116,8 +116,8 @@ class GeomComparison:
         perfect_compound_name = self.perfect_cell.treetitle
         defect_compound_name = self.defect_cell.treetitle
 
-        self.perfect_cell_atoms_coordinates = convert_PyVALENCE_pos_to_list(self.perfect_cell_atoms_positions)
-        self.defect_cell_atoms_coordinates = convert_PyVALENCE_pos_to_list(self.defect_cell_atoms_positions)
+        self.perfect_cell_atoms_coordinates = convert_PyDEF_pos_to_list(self.perfect_cell_atoms_positions)
+        self.defect_cell_atoms_coordinates = convert_PyDEF_pos_to_list(self.defect_cell_atoms_positions)
         # To fractional coordinates (easier to get neighbouring cells, and already implemented)
         self.perfect_cell_atoms_coordinates = toFracCoord(self.perfect_cell_atoms_coordinates,self.metrics)
         self.defect_cell_atoms_coordinates = toFracCoord(self.defect_cell_atoms_coordinates,self.metrics)     
@@ -340,8 +340,8 @@ def next_cell_atom(atom, trans_vect):
 
 ########################################################################
 
-# Convert PyVALENCE positions format to convenient format for geom comparison
-def convert_PyVALENCE_pos_to_list(atom_pos):
+# Convert PyDEF positions format to convenient format for geom comparison
+def convert_PyDEF_pos_to_list(atom_pos):
     res=[]
     for atom in atom_pos:
         line=[

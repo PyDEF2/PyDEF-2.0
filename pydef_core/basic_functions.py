@@ -6,29 +6,29 @@ import os
 
 # -------------------------------------------------- PYVALENCE EXCEPTIONS --------------------------------------------------
 
-class PyVALENCEImportError(Exception):
+class PyDEFImportError(Exception):
     """ Error raised when there is an error when importing the data """
     pass
 
 
-class PyVALENCEOutcarError(Exception):
+class PyDEFOutcarError(Exception):
     """ Error raised when the given OUTCAR file is not a valid OUTCAR file """
     pass
 
 
-class PyVALENCEDoscarError(Exception):
+class PyDEFDoscarError(Exception):
     """ Error raised when the given DOSCAR file is not consistent with the OUTCAR file """
     pass
 
-class PyVALENCEDefectCreationError(Exception):
+class PyDEFDefectCreationError(Exception):
     """ Error raised when the user has not specified the Defects parameters correctly (GUI)"""
     pass
 
-class PyVALENCESolveError(Exception):
+class PyDEFSolveError(Exception):
     """ Error raised when an iterative equation solving scheme fails"""
     pass
 
-class PyVALENCEInputError(Exception):
+class PyDEFInputError(Exception):
     pass
 
 # ------------------------------------------------------ FUNCTIONS -----------------------------------------------------

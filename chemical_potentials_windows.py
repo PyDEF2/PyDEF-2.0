@@ -1,5 +1,5 @@
 """
-    Project Manager in PyVALENCE GUI
+    Project Manager in PyDEF GUI
     version: 2.0
     author: Adrien Stoliaroff
     email: adrien.stoliaroff@cnrs-imn.fr
@@ -191,7 +191,7 @@ class PotentialsPlotParametersWindow(tk.Toplevel):
             self.cchoice.grid(row=2, column=1)
             self.xchoice.bind("<<ComboboxSelected>>", lambda x: self.choice(0))
             self.xchoice.set(self.ppp.mu_Y_axis)
-            self.cchoice.set(self.ppp.const)
+            self.cchoice.config(text=self.ppp.const)
         else:
             self.labelX.grid(row=1, column=0)
             self.labelY.grid(row=1, column=1)
@@ -321,7 +321,7 @@ class PotentialsPlotParametersWindow(tk.Toplevel):
         self.show_colors_button = tk.Button(self.color_englobing_pane, text = '\\/', command = show_colors)
         self.show_colors_button.grid(row=1, column=1)
         
-        competing_phases = [cell.rname for cell in self.chemical_potentials.non_synthesized.values() if cell.ID != self.chemical_potentials.synthesized.ID]
+        competing_phases = [cell.ID for cell in self.chemical_potentials.non_synthesized.values() if cell.ID != self.chemical_potentials.synthesized.ID]
         competing_phases.sort()
         k = 0
         self.colortable = {}
@@ -329,10 +329,10 @@ class PotentialsPlotParametersWindow(tk.Toplevel):
             self.ppp.colors[phase] = askcolor(parent=self)[1]
             self.colortable[phase].configure(bg=self.ppp.colors[phase])
         
-        for phase in competing_phases:
-            tk.Label(self.colorpane, text=phase).grid(row=2+k, column=0)
-            self.colortable[phase] = tk.Button(self.colorpane, text='\t\t', bg=self.ppp.colors[phase], command=lambda port = phase: setcolor(port))
-            self.colortable[phase].grid(row=2+k, column=1)
+        for phase_id in competing_phases:
+            tk.Label(self.colorpane, text=self.chemical_potentials.non_synthesized[phase_id].rname).grid(row=2+k, column=0)
+            self.colortable[phase_id] = tk.Button(self.colorpane, text='\t\t', bg=self.ppp.colors[phase_id], command=lambda port = phase_id: setcolor(port))
+            self.colortable[phase_id].grid(row=2+k, column=1)
             k += 1
             
         self.color_englobing_pane.grid(row=1, column=2, sticky='nsew')
@@ -375,7 +375,7 @@ class PotentialsPlotParametersWindow(tk.Toplevel):
             if self.chemical_potentials.synth_population == 2:
                 self.ppp.mu_X_axis = ''
                 self.ppp.mu_Y_axis = self.xchoice.get()
-                self.ppp.const = self.cchoice.get()
+                self.ppp.const = self.cchoice["text"]
             else:
                 self.ppp.mu_X_axis = self.xchoice.get()
                 self.ppp.mu_Y_axis = self.ychoice.get()

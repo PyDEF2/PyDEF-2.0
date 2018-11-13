@@ -1,5 +1,5 @@
 """
-    Project Manager in PyVALENCE GUI
+    Project Manager in PyDEF GUI
     version: 2.0
     author: Adrien Stoliaroff
     email: adrien.stoliaroff@cnrs-imn.fr
@@ -100,16 +100,16 @@ class DefectStudyCreationWindow(tk.Toplevel):
                     if not(name_entry_content in self.defect_creation_frame.existing_defects_list) and len(name_entry_content)>0:
                         # Check name
                         if len(name_entry_content)<1:
-                            raise bf.PyVALENCEDefectCreationError('Please specify a name for the new Defect')
+                            raise bf.PyDEFDefectCreationError('Please specify a name for the new Defect')
                         # Check defect type
                         if not(self.defect_creation_frame.defect_type in ['Vacancy', 'Interstitial', 'Substitutional']):
-                            raise bf.PyVALENCEDefectCreationError('Please select a Defect type (vacancy/substitution/interstitial) for the new Defect')
+                            raise bf.PyDEFDefectCreationError('Please select a Defect type (vacancy/substitution/interstitial) for the new Defect')
                         # Check affected atom
                         if not(self.defect_creation_frame.atom_entry.get() in self.defect_creation_frame.atoms_list):
-                            raise bf.PyVALENCEDefectCreationError('Please select the atom affected by the new Defect')
+                            raise bf.PyDEFDefectCreationError('Please select the atom affected by the new Defect')
                         # Check chemical potential
                         if len(self.defect_creation_frame.chem_pot_entry.get()) == 0:
-                            raise bf.PyVALENCEDefectCreationError('Please specify the chemical potential of the atom affected by the new Defect')
+                            raise bf.PyDEFDefectCreationError('Please specify the chemical potential of the atom affected by the new Defect')
                         elif not(float(self.defect_creation_frame.chem_pot_entry.get())<=0):
                             self.mainwindow.printerror('Chemical potentials must be negative or null floats!')
                         self.create_defect()
@@ -121,22 +121,17 @@ class DefectStudyCreationWindow(tk.Toplevel):
                         self.step += 1
                 except ValueError:
                     self.mainwindow.printerror('Chemical potentials must be negative or null floats!')
-                except bf.PyVALENCEDefectCreationError, e:
+                except bf.PyDEFDefectCreationError, e:
                     self.mainwindow.printerror(str(e))
             elif self.step == 1:
                 # Create Defect Study
                 if self.defect_study is None:
                     self.host_cell = self.project.cells[self.project.hostcellid]
-                    
                     self.defects = [self.project.defects[defect_name] for defect_name in self.defect_study_creation_frame.defect_frame.get_choice()]
-                    # [self.project.defects.pop(defect_name) for defect_name in self.defect_study_creation_frame.defect_frame.get_choice()]
-                    
                     self.gaps_input = self.defect_study_creation_frame.gap_input_frame.get_gaps()
-                
-                    self.defect_study = ds.DefectStudy(self.host_cell, self.host_cell, self.defects, 'other', 0, 0, 0, 0, self.gaps_input)
-                    # Checks
                     if len(self.defects) == 0:
-                        raise bf.PyVALENCEDefectCreationError('Please select a Defect for the new Defect Study')
+                        raise bf.PyDEFDefectCreationError('Please select a Defect for the new Defect Study')
+                    self.defect_study = ds.DefectStudy(self.host_cell, self.host_cell, self.defects, 'other', 0, 0, 0, 0, self.gaps_input)
                 else:
                     self.defects = [self.project.defects[defect_name] for defect_name in self.defect_study_creation_frame.defect_frame.get_choice()]
                     self.defect_study.defects = self.defects
@@ -170,7 +165,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
                 mp_correction = self.defect_corrections_frame.mp_corr_var.get()
                 # Check that e_r > 0
                 if float(e_r) <=0:
-                    raise bf.PyVALENCEDefectCreationError('Relative permittivity must be a strictly positive float number!')
+                    raise bf.PyDEFDefectCreationError('Relative permittivity must be a strictly positive float number!')
                 if not self.edit:
                     self.defect_study = ds.DefectStudy(self.host_cell, host_cell_b, self.defects, geometry, e_r, mk_1_1, de_vbm_input, de_cbm_input, self.gaps_input, 
                     pa_correction=pa_correction, mb_correction=mb_correction, phs_correction=phs_correction, vbm_correction=vbm_correction, mp_correction=mp_correction)
@@ -212,7 +207,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
                 self.title('Defect Study Creation Window: Populate Defect Study')
                 self.defect_populate_frame = DefectStudyPopulateFrame(self, self.project, self.mainwindow, self.defect_study)
                 self.step += 1
-        except bf.PyVALENCEDefectCreationError, e:
+        except bf.PyDEFDefectCreationError, e:
             self.mainwindow.printerror(str(e))
         except ValueError, e:
             self.mainwindow.printerror(str(e))
@@ -825,7 +820,7 @@ class DefectStudyCorrectionsFrame(object):
         self.previous_button = Button(self.button_pane1, text = '<< Previous', command=parent.previous_frame)
         try:
             self.next_button = Button(self.button_pane1, text = 'Next>>', command=parent.next_frame)
-        except bf.PyVALENCEDefectCreationError, e:
+        except bf.PyDEFDefectCreationError, e:
             selfparent.mainwindow.printerror(str(e))
         self.cancel_button = Button(self.button_pane1, text = 'Cancel', command=parent.cancel)
         self.previous_button.grid(row = 0, column = 0)

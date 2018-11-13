@@ -218,7 +218,7 @@ class DefectStudy(object):
         self.gap = self.host_cell.gap - self.de_vbm + self.de_cbm  # corrected gap
         self.gaps['Calculated gap'] = self.gap
         self.fpp = FormationPlotParameters(self)
-        self.tpp = TransitionPlotParameters(self)
+        self.lasttpp = TransitionPlotParameters(self)
         
     @property
     def dcs(self):
@@ -340,7 +340,7 @@ class DefectStudy(object):
         k_b = 8.617e-5  # Boltzmann constant in eV/K
         e_for, charge = self.get_formation_energy_low_EF(e_fermi)
         if self.defects[0].nb_sites is None:
-            raise bf.PyVALENCEInputError('Defect ' + self.defects[0].displayname + ' has no number of sites specified, please specify before computing concentrations!')
+            raise bf.PyDEFInputError('Defect ' + self.defects[0].displayname + ' has no number of sites specified, please specify before computing concentrations!')
         return self.defects[0].nb_sites * np.exp(-e_for / (k_b * temperature)) / self.host_cell.volume
 
     def export(self, filename, separator):
@@ -689,7 +689,7 @@ class ConcentrationsCalculation(object):
         except ValueError:
             error_message = 'Unable to find a root while solving neutrality of charge equation at growth temperature! '
             error_message += 'Consider specifying effective masses of carriers.'
-            raise bf.PyVALENCESolveError(error_message)
+            raise bf.PyDEFSolveError(error_message)
             return
 
         n_defects = self.get_defect_concentration_at_ef(e_f_growth, t_growth)
@@ -701,7 +701,7 @@ class ConcentrationsCalculation(object):
         except ValueError:
             error_message = 'Unable to find a root while solving neutrality of charge equation at room temperature! '
             error_message += 'Consider specifying effective masses of carriers.'
-            raise bf.PyVALENCESolveError(error_message)
+            raise bf.PyDEFSolveError(error_message)
             return
 
         # noinspection PyTypeChecker

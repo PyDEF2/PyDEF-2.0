@@ -62,7 +62,6 @@ class Main_Window(tk.Tk):
         self.geometry("{0}x{1}+0+0".format(self.winfo_screenwidth()-15, self.winfo_screenheight()))
         self.wm_minsize(width = self.winfo_screenwidth()/2, height = self.winfo_screenwidth()/2)
         self.title('PyDEF 2.0')
-        print sys.platform
         platform = sys.platform
         if platform == 'win32' :
             self.state("zoomed")
@@ -167,7 +166,7 @@ class Main_Window(tk.Tk):
         exitButton = Button(self.toolbar, text='Exit', image=self.exiticon, compound=TOP, command=self.exit_pydef)
         exitButton.pack(side=LEFT, padx=2, pady=2)
 
-        if self.dev:
+        if self.dev is True:
             checkButton = Button(self.toolbar, text='Check', command=self.check)
             checkButton.pack(side=LEFT, padx=2, pady=2)
 
@@ -283,8 +282,8 @@ class Main_Window(tk.Tk):
 
     def check(self):
         # For Development only
-        print 'check'
-        print self.projects
+        print 'mem %s' %self.projects_mem.keys()
+        self.pm.check_tree()
 
     def delete(self):
         self.pm.delete()
@@ -299,7 +298,7 @@ class Main_Window(tk.Tk):
             self.destroy()
         else:
             return None
-
+    
     def export(self):
         project = self.projects[self.currentprojectid]
         def get_filename():
@@ -357,7 +356,7 @@ class Main_Window(tk.Tk):
 
     def printerror(self, message):
         self.consolText.config(state=NORMAL)
-        self.consolText.insert(END, '\n' + '!!!Error!!! ' + message + '\n', 'err')
+        self.consolText.insert(END, '\n!!!Error!!! %s \n' %message, 'err')
         self.consolText.see(END)
         self.consolText.config(state=DISABLED)
         if self.dev:
@@ -714,9 +713,12 @@ class Main_Window(tk.Tk):
                 self.projects[pid].pid = pid
             print 'Project ' + self.projects[pid].name + ' loaded successfully!\n'
         except IOError:
-            print 'No *.pyd file found for Project ' + pid + '! Project deleted.'
-            if pid in self.projects.keys():
-                self.projects.pop(pid)
+            print 'No *.pyd file found for Project %s!' %pid
+            print self.projects.keys()
+            if pid in self.projects_mem.keys():
+                self.projects_mem.pop(pid)
+                print 'Project %s deleted.' %pid
+            self.projects.keys()
         except KeyError:
             self.printerror('Sorry! I do not remember any path to a *.pyd save file for this project.')
         except EOFError:

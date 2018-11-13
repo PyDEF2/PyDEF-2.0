@@ -49,7 +49,7 @@ class CellsInfoWindow(tk.Toplevel):
         self.systags_frame.grid(row=1, column=1, sticky='nswe', padx=5, pady=5)
 
         tags = ('Method', 'NEDoS', 'EDIFF', 'ENCUT', 'ISMEAR', 'LORBIT', 'ISPIN', 'ICHARG')
-        tags_values = (cell.functional, cell.nedos, cell.ediff, cell.encut, cell.ismear, cell.lorbit, cell.ispin,
+        tags_values = (cell.functional, cell.nedos, '%.0E' %cell.ediff, cell.encut, cell.ismear, cell.lorbit, cell.ispin,
                        cell.icharg)
 
         for t, v, i in zip(tags, tags_values, range(len(tags))):

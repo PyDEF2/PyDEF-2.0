@@ -1,4 +1,4 @@
-""" Module used to import results of VASP calculations in PyVALENCE """
+""" Module used to import results of VASP calculations in PyDEF """
 
 import numpy as np
 import scipy.optimize as sco
@@ -35,7 +35,7 @@ class Cell(object):
 
         # Check that the OUTCAR file start with "vasp."
         if self.outcar[0][:6] != ' vasp.':
-            raise bf.PyVALENCEOutcarError('The given file appears not to be a valid OUTCAR file.')
+            raise bf.PyDEFOutcarError('The given file appears not to be a valid OUTCAR file.')
 
         # ---------------------------------------------- CALCULATION TAGS ----------------------------------------------
 
@@ -69,7 +69,7 @@ class Cell(object):
         if self._nb_atoms_tot != sum(self._nb_atoms) or \
                 len(self._nb_atoms) != len(self._atoms_types) or \
                 len(self._nb_atoms) != len(self._atoms_valence):
-            raise bf.PyVALENCEImportError('Numbers of atoms retrieved are not consistent')
+            raise bf.PyDEFImportError('Numbers of atoms retrieved are not consistent')
 
         self.name, self.display_name = get_system_name(self._atoms_types, self._nb_atoms, False)  # full name
         self.rname, self.display_rname = get_system_name(self._atoms_types, self._nb_atoms, True)  # reduced name
@@ -88,7 +88,7 @@ class Cell(object):
         self._volume = np.linalg.det(self._cell_parameters) * 1e-30  # volume in m^3
 
         # Energy & Density of states
-        self._total_energy = bf.grep(self.outcar, 'free energy    TOTEN  =', -1, 'eV', 'float', self._nb_iterations)
+        self._total_energy = bf.grep(self.outcar, 'free  energy   TOTEN  =', -1, 'eV', 'float')
         
         try:
             if self._ismear == 0:
@@ -175,7 +175,7 @@ class Cell(object):
             try:
                 self.optical_indices = oi.OpticalIndices(self.outcar) 
             except TypeError:
-                raise bf.PyVALENCEImportError('Sorry... Something went wrong... Could not complete import')
+                raise bf.PyDEFImportError('Sorry... Something went wrong... Could not complete import')
         self.gc = None # Geom Comparison
         
 
@@ -396,7 +396,7 @@ class Cell(object):
             expected_doscar_length = 6 + sum(self._nb_atoms) * (self._nedos + 1) + self._nedos
             if doscar_length != expected_doscar_length:
                 print 'Warning! Found %i lines instead of %i as expected (%i atoms, NEDOS=%i)' % (doscar_length, expected_doscar_length, sum(self._nb_atoms), self._nedos)
-                raise bf.PyVALENCEDoscarError('Analysing DoS... The DOSCAR file is not consistent with the OUTCAR file: '
+                raise bf.PyDEFDoscarError('Analysing DoS... The DOSCAR file is not consistent with the OUTCAR file: '
                                      'length of DOSCAR content not as expected')
         else:
             expected_doscar_length = 6 + self.nedos  # Beware of the white line at the end of the file
@@ -1051,7 +1051,6 @@ class Cell(object):
         if bpp.hs_kpoints_names != ['']:
             nb_hs_kpoints = len(bpp.hs_kpoints_names)
             try:
-                print 'test'
                 ax.set_xticks([f[0] for f in np.split(positions, nb_hs_kpoints-1)] + [positions[-1]])
                 ax.set_xticklabels(['$' + f + '$' for f in bpp.hs_kpoints_names])
                 for x in [f[0] for f in np.split(positions, nb_hs_kpoints-1)][1:]:
@@ -1249,11 +1248,11 @@ def get_atoms_positions(outcar, atoms):
 
     str_beg = 'position of ions in cartesian coordinates  (Angst):'
     index_beg = bf.grep(outcar, str_beg, nb_found=1)[0][1] + 1  # index of the first atom position
-    index_end = outcar[index_beg:].index('') - 1
+    index_end = len(atoms) 
     atoms_positions = np.transpose(bf.fast_stringcolumn_to_array(outcar[index_beg: index_end+index_beg]))
     # Check that the number of positions retrieved is equal to the number of atoms
     if len(atoms_positions) != len(atoms):
-        raise bf.PyVALENCEImportError("The number of atoms positions is not consistent with the total number of atoms")
+        raise bf.PyDEFImportError("The number of atoms positions is not consistent with the total number of atoms")
     else:
         return dict(zip(atoms, atoms_positions))
 
@@ -1295,14 +1294,17 @@ def get_electrostatic_potentials(outcar, atoms):
     :return: dictionary with the electrostatic potential for each atom """
 
     index_beg = bf.grep(outcar, 'average (electrostatic) potential at core', nb_found=1)[0][1] + 3
-    index_end = outcar[index_beg:].index(' ')
+    try:
+        index_end = outcar[index_beg:].index(' ')
+    except ValueError,e :
+        index_end = outcar[index_beg:].index('')
 
     potentials_str = outcar[index_beg: index_beg + index_end]
     potentials_raw = np.concatenate([[float(f) for f in re.split(' {5}|-', q)[1:]] for q in potentials_str])
     potentials = np.array([-f[1] for f in np.split(potentials_raw, len(atoms))])
 
     if len(potentials) != len(atoms):
-        raise bf.PyVALENCEImportError('Number of electrostatic potentials retrieved and number are not consistent')
+        raise bf.PyDEFImportError('Number of electrostatic potentials retrieved and number are not consistent')
 
     return dict(zip(list(atoms), potentials))
 
@@ -1319,14 +1321,14 @@ def get_kpoints_weights_and_coords(outcar, nkpts, rec=False):
     else:
         string = 'k-points in reciprocal lattice and weights'
     index_beg = bf.grep(outcar, string, nb_found=1)[0][1] + 1
-    index_end = outcar[index_beg:].index(' ')  # find the next blank line
+    index_end = nkpts
 
     data_str = outcar[index_beg: index_beg+index_end]
     x, y, z, weights = bf.fast_stringcolumn_to_array(data_str)
     coordinates = np.transpose([x, y, z])
 
     if len(weights) != nkpts:
-        raise bf.PyVALENCEImportError('Number of kpoint weights retrieved and number of kpoints are not consistent')
+        raise bf.PyDEFImportError('Number of kpoint weights retrieved and number of kpoints are not consistent')
     else:
         return coordinates, weights
 
