@@ -279,7 +279,6 @@ class ProjectsManager(object):
             self.mainwindow.currentprojectid = self.tree.item(self.popup.selection)['values'][0]
             self.mainwindow.currentitemid = self.tree.item(self.popup.selection)['values'][1]
 
-            # print 'Tree entry ID: ' + self.tree.item(self.popup.selection)['values'][1]
             if self.mainwindow.projects[self.mainwindow.currentprojectid].object_str_type(self.tree.item(self.popup.selection)['values'][1]) == 'cell':
                 self.popup.add_command(label="Rename", command=rename)
                 self.popup.add_command(label="Delete", command=self.delete)
@@ -382,7 +381,6 @@ class ProjectsManager(object):
                     return None
             if len(otype)<1:
                 otype = mainwindow.projects[pid].object_str_type(cid)
-            # print 'otype: ' + otype
 
             if otype == 'cell':
                 res, containerID, removeID = mainwindow.projects[pid].is_embedded(cid)
@@ -794,17 +792,17 @@ class Project(object):
     def is_host(self, cell):
         return cell.ID == self.hostcellid
 
-    def add_defect(self, defect, defect_displayname):
-        name = defect.displayname
+    def add_defect(self, defect, defect_name):
+        name = defect.name
         if name in self.defects.keys():
-            self.defects[defect.displayname].chem_pot = defect.chem_pot
-            self.defects[defect.displayname].nb_sites = defect.nb_sites
-            self.defects[defect.displayname].name = defect.name
-            print 'Defect ' + defect.displayname + ' edited successfully'
+            self.defects[defect.name].chem_pot = defect.chem_pot
+            self.defects[defect.name].nb_sites = defect.nb_sites
+            self.defects[defect.name].name = defect.name
+            print 'Defect %s edited successfully'%defect.name
         else:
-            defect.displayname = defect_displayname
-            self.defects[defect.displayname] = defect
-            print 'Defect ' + defect.displayname + ' created successfully'
+            defect.name = defect_name
+            self.defects[defect.name] = defect
+            print 'Defect %s created successfully'%defect.name
 
     def add_cell(self, cell, dev = False):
         self.IDn += 1

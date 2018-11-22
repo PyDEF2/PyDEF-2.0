@@ -724,9 +724,9 @@ class ConcentrationsCalculation(object):
 
         n_defects = np.transpose(data[2])
         del data[2]
-        data = np.array(data)
+        data = np.array(data[:-1])
         data = np.append(data, n_defects, axis=0)
-        data_dict = dict(zip(self.data_id, data[:-1]))
+        data_dict = dict(zip(self.data_id, data))
 
         return temperatures, data_dict
         
@@ -746,7 +746,7 @@ class ConcentrationsCalculation(object):
             for i in pp.data_id:
                 y = data_dict[i]
                 if type(pp) == CarrierConcentrationPlotParameters or type(pp) == ConcentrationPlotParameters:
-                    y *= 1e-10
+                    y *= 1e10
                 else:
                     # add CB and VB
                     cband = patches.Rectangle(

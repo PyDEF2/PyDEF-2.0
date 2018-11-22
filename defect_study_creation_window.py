@@ -59,22 +59,24 @@ class DefectStudyCreationWindow(tk.Toplevel):
 
     def create_defect(self):
         if self.step == 0:
-            try:
-                if self.defect_creation_frame.defect_type == 'Substitutional':
-                    atom_entries = [self.defect_creation_frame.atom_entry.get(), self.defect_creation_frame.atom_entry2.get()]
-                    chem_pot = [float(self.defect_creation_frame.chem_pot_entry.get()), float(self.defect_creation_frame.chem_pot_entry.get())]
-                    defect = dc.Defect(self.defect_creation_frame.defect_type, atom_entries, chem_pot, nb_sites=float(self.defect_creation_frame.nb_sites.get()))
-                else:
-                    defect = dc.Defect(self.defect_creation_frame.defect_type, [self.defect_creation_frame.atom_entry.get()], [float(self.defect_creation_frame.chem_pot_entry.get())], nb_sites=float(self.defect_creation_frame.nb_sites.get()))
-                if len(self.defect_creation_frame.defname.get()) > 0:
-                    defect.name = self.defect_creation_frame.defname.get()
-                self.project.add_defect(defect, self.defect_creation_frame.name_entry.get())
-                self.defect_creation_frame.update_existing_defect_list()
-            except ValueError, e:
-                if len(self.defect_creation_frame.name_entry.get()) == 0:
-                    self.mainwindow.printerror('Please specify defect attributes before trying to save it')
-                else:
+            if self.defect_creation_frame.nb_sites.get() != '':
+                try:
+                    nb_sites = float(self.defect_creation_frame.nb_sites.get())
+                except ValueError, e:
                     self.mainwindow.printerror('Mistyping? Please specify a float value for the number of sites')
+            else:
+                nb_sites=None
+            if self.defect_creation_frame.defect_type == 'Substitutional':
+                atom_entries = [self.defect_creation_frame.atom_entry.get(), self.defect_creation_frame.atom_entry2.get()]
+                chem_pot = [float(self.defect_creation_frame.chem_pot_entry.get()), float(self.defect_creation_frame.chem_pot_entry.get())]
+                defect = dc.Defect(self.defect_creation_frame.defect_type, atom_entries, chem_pot, nb_sites=nb_sites)
+            else:
+                defect = dc.Defect(self.defect_creation_frame.defect_type, [self.defect_creation_frame.atom_entry.get()], [float(self.defect_creation_frame.chem_pot_entry.get())], nb_sites=nb_sites)
+            if len(self.defect_creation_frame.name_entry.get().split() ) == 0:
+                self.project.add_defect(defect, defect.name)
+            else:
+                self.project.add_defect(defect, self.defect_creation_frame.name_entry.get())
+            self.defect_creation_frame.update_existing_defect_list()
     
     def restore_defects(self):
         """To be called when the user cancels the creation after the Defect Study has been created"""
