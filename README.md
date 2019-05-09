@@ -22,7 +22,7 @@ the executable PyDEF2.exe. No installation is required as long as
 the file stays inside this folder (the folder itself can be moved
 wherever wanted).
 
-To use the code from Python, check that Python 2.7 is installed
+To use the code from Python, check that Python 3.7 is installed
 with the following libraries:
 - numpy
 - matplotlib
