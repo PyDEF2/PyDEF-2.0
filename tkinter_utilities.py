@@ -1,8 +1,8 @@
-import ttk
-import tkMessageBox as mb
-import Tkinter as tk
-import tkColorChooser as tcc
-from Tkinter import RAISED, END, VERTICAL, RIGHT, LEFT
+import tkinter.ttk
+import tkinter.messagebox as mb
+import tkinter as tk
+import tkinter.colorchooser as tcc
+from tkinter import RAISED, END, VERTICAL, RIGHT, LEFT
 
 
 def centre_window(window):
@@ -24,7 +24,7 @@ def centre_window(window):
 def disable_frame(frame):
     """ Disable all child widgets of frame and all child widgets of its subframes """
     for child in frame.winfo_children():
-        if type(child) is ttk.Frame:
+        if type(child) is tkinter.ttk.Frame:
             disable_frame(child)
         else:
             child.configure(state='disable')
@@ -33,7 +33,7 @@ def disable_frame(frame):
 def enable_frame(frame):
     """ Enable all child widgets of frame and all child widgets of its subframes """
     for child in frame.winfo_children():
-        if type(child) is ttk.Frame:
+        if type(child) is tkinter.ttk.Frame:
             enable_frame(child)
         else:
             child.configure(state='enable')
@@ -46,11 +46,11 @@ class DisplayParametersFrame(tk.Toplevel):
         cb_kwargs = dict(onvalue=True, offvalue=False)
         frame_kwargs = dict(padx=2, pady=2)
 
-        self.frame = ttk.Frame(parent)
-        self.frame.pack(expand=True, fill='both')
+        self.frame = tkinter.ttk.Frame(parent)
+        self.frame.grid(sticky="nswe")#pack(expand=True, fill='both')
         
         display_param_label = tk.Label(self.frame, text='Display parameters', font=('', '16', 'bold'))
-        self.main_frame = ttk.LabelFrame(self.frame, labelwidget=display_param_label)
+        self.main_frame = tkinter.ttk.LabelFrame(self.frame, labelwidget=display_param_label)
         self.main_frame.pack(expand=True, fill='both')
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.X = X
@@ -60,60 +60,60 @@ class DisplayParametersFrame(tk.Toplevel):
         
         # ---------------------------------------------------- TITLE ---------------------------------------------------
 
-        title_frame = ttk.Frame(self.main_frame)
+        title_frame = tkinter.ttk.Frame(self.main_frame)
         title_frame.pack(expand=True, fill='x', **frame_kwargs)
         title_frame.grid_columnconfigure(0, weight=1)
 
         self.title_var = tk.StringVar(value=pp.title)
-        ttk.Label(title_frame, text='Title ').pack(side='left')
-        ttk.Entry(title_frame, textvariable=self.title_var, width=50).pack(side='left', expand=True, fill='x')
+        tkinter.ttk.Label(title_frame, text='Title ').pack(side='left')
+        tkinter.ttk.Entry(title_frame, textvariable=self.title_var, width=50).pack(side='left', expand=True, fill='x')
 
         # -------------------------------------------------- FONTSIZE --------------------------------------------------
         
         # Title fontsize
 
-        fontsize_frame = ttk.Frame(self.main_frame)
+        fontsize_frame = tkinter.ttk.Frame(self.main_frame)
         fontsize_frame.pack(**frame_kwargs)
         fontsize_frame.grid_columnconfigure(0, weight=1)
 
         self.fontsize_var = tk.IntVar(value=pp.fontsize)
         self.title_fontsize_var = tk.IntVar(value=pp.title_fontsize)
         
-        ttk.Label(fontsize_frame, text='Title fontsize ').grid(row=0, column=0)
+        tkinter.ttk.Label(fontsize_frame, text='Title fontsize ').grid(row=0, column=0)
         tk.Spinbox(fontsize_frame, textvariable=self.title_fontsize_var, width=3, from_=10, to=100).grid(row=0, column=1)
         
-        ttk.Label(fontsize_frame, text='General fontsize ').grid(row=0, column=2)
+        tkinter.ttk.Label(fontsize_frame, text='General fontsize ').grid(row=0, column=2)
         tk.Spinbox(fontsize_frame, textvariable=self.fontsize_var, width=3, from_=10, to=100).grid(row=0, column=3)
         
         # --------------------------------------------------- LEGEND ---------------------------------------------------
 
-        legend_frame = ttk.Frame(self.main_frame)
+        legend_frame = tkinter.ttk.Frame(self.main_frame)
         legend_frame.pack(**frame_kwargs)
         legend_frame.grid_columnconfigure(0, weight=1)
 
         self.legend_var = tk.BooleanVar(value=pp.display_legends)
         self.lfontsize_var = tk.IntVar(value=pp.l_fontsize)
 
-        ttk.Checkbutton(legend_frame, text='Display legend   ', variable=self.legend_var, **cb_kwargs).pack(side='left')
-        ttk.Label(legend_frame, text='Legend fontsize').pack(side='left')
+        tkinter.ttk.Checkbutton(legend_frame, text='Display legend   ', variable=self.legend_var, **cb_kwargs).pack(side='left')
+        tkinter.ttk.Label(legend_frame, text='Legend fontsize').pack(side='left')
         tk.Spinbox(legend_frame, textvariable=self.lfontsize_var, width=3, from_=10, to=100).pack(side='left')
 
         # ---------------------------------------------------- GRID ----------------------------------------------------
 
         self.grid_var = tk.BooleanVar(value=pp.grid)
-        ttk.Checkbutton(self.main_frame, text='Show grid ', variable=self.grid_var).pack()
+        tkinter.ttk.Checkbutton(self.main_frame, text='Show grid ', variable=self.grid_var).pack()
 
         # --------------------------------------------------- X-AXIS ---------------------------------------------------
 
-        x_frame_label = ttk.Label(self.frame, text=X+' axis', font='-weight bold')
-        x_frame = ttk.LabelFrame(self.main_frame, labelwidget=x_frame_label)
+        x_frame_label = tkinter.ttk.Label(self.frame, text=X+' axis', font='-weight bold')
+        x_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=x_frame_label)
         x_frame.pack(expand=True, fill='x', **frame_kwargs)
         x_frame.grid_columnconfigure(1, weight=1)
 
         # xlabel
         self.xlabel_var = tk.StringVar(value=pp.x_label)
-        ttk.Label(x_frame, text=X + ' axis label ').grid(row=0, column=0)
-        ttk.Entry(x_frame, textvariable=self.xlabel_var).grid(row=0, column=1, sticky='we')
+        tkinter.ttk.Label(x_frame, text=X + ' axis label ').grid(row=0, column=0)
+        tkinter.ttk.Entry(x_frame, textvariable=self.xlabel_var).grid(row=0, column=1, sticky='we')
 
         # X limits
         self.xlim_frame = RangeFrame(x_frame, pp.xmin, pp.xmax, X + ' range', width=5)
@@ -121,23 +121,23 @@ class DisplayParametersFrame(tk.Toplevel):
 
         # X-ticks
         self.xticks_var = tk.BooleanVar(value=pp.xticks_var)
-        ttk.Checkbutton(x_frame, text='Display ' + X + ' axis ticks', variable=self.xticks_var, **cb_kwargs).grid(row=2, column=0, columnspan=2, sticky='w')
+        tkinter.ttk.Checkbutton(x_frame, text='Display ' + X + ' axis ticks', variable=self.xticks_var, **cb_kwargs).grid(row=2, column=0, columnspan=2, sticky='w')
 
         # X-ticks labels
         self.xticklabels_var = tk.BooleanVar(value=pp.xticklabels_var)
-        ttk.Checkbutton(x_frame, text='Display ' + X + ' ticks labels', variable=self.xticklabels_var, **cb_kwargs).grid(row=3, column=0, columnspan=2, sticky='w')
+        tkinter.ttk.Checkbutton(x_frame, text='Display ' + X + ' ticks labels', variable=self.xticklabels_var, **cb_kwargs).grid(row=3, column=0, columnspan=2, sticky='w')
 
         # --------------------------------------------------- Y-AXIS ---------------------------------------------------
 
-        y_frame_label = ttk.Label(self.frame, text=Y+' axis', font='-weight bold')
-        y_frame = ttk.LabelFrame(self.main_frame, labelwidget=y_frame_label)
+        y_frame_label = tkinter.ttk.Label(self.frame, text=Y+' axis', font='-weight bold')
+        y_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=y_frame_label)
         y_frame.pack(expand=True, fill='x', **frame_kwargs)
         y_frame.grid_columnconfigure(1, weight=1)
 
         # ylabel
         self.ylabel_var = tk.StringVar(value=pp.y_label)
-        ttk.Label(y_frame, text=Y + ' axis label ').grid(row=0, column=0)
-        ttk.Entry(y_frame, textvariable=self.ylabel_var).grid(row=0, column=1, sticky='we')
+        tkinter.ttk.Label(y_frame, text=Y + ' axis label ').grid(row=0, column=0)
+        tkinter.ttk.Entry(y_frame, textvariable=self.ylabel_var).grid(row=0, column=1, sticky='we')
 
         # Y limits
         self.ylim_frame = RangeFrame(y_frame, pp.ymin, pp.ymax, Y + ' range', width=5)
@@ -145,11 +145,11 @@ class DisplayParametersFrame(tk.Toplevel):
 
         # Y-ticks
         self.yticks_var = tk.BooleanVar(value=pp.yticks_var)
-        ttk.Checkbutton(y_frame, text='Display ' + Y + ' ticks', variable=self.yticks_var, **cb_kwargs).grid(row=2, column=0, columnspan=2, sticky='w')
+        tkinter.ttk.Checkbutton(y_frame, text='Display ' + Y + ' ticks', variable=self.yticks_var, **cb_kwargs).grid(row=2, column=0, columnspan=2, sticky='w')
 
         # Y-ticks labels
         self.yticklabels_var = tk.BooleanVar(value=pp.yticks_var)
-        ttk.Checkbutton(y_frame, text='Display ' + Y + ' ticks labels', variable=self.yticklabels_var, **cb_kwargs).grid(row=3, column=0, columnspan=2, sticky='w')
+        tkinter.ttk.Checkbutton(y_frame, text='Display ' + Y + ' ticks labels', variable=self.yticklabels_var, **cb_kwargs).grid(row=3, column=0, columnspan=2, sticky='w')
         
         
     def update_frame(self, pp):
@@ -213,19 +213,19 @@ class ItemsChoiceFrame(tk.Toplevel):
         self.parent = parent
         self.items = items
 
-        self.main_frame = ttk.LabelFrame(parent, labelwidget=labeltitle)
+        self.main_frame = tkinter.ttk.LabelFrame(parent, labelwidget=labeltitle)
 
         items_off = list(set(items) - set(items_on))
 
         # -------------------------------------------------- ITEMS OFF -------------------------------------------------
 
-        self.frame_off = ttk.LabelFrame(self.main_frame, text=label_off)
+        self.frame_off = tkinter.ttk.LabelFrame(self.main_frame, text=label_off)
 
         self.list_off = tk.Listbox(self.frame_off)  # list containing element not plotted
         self.list_off.config(height=5)
         self.list_off.pack(side='right')
         if (len(items_off) or len(items_on))>5:
-            self.yscrollbar_off = ttk.Scrollbar(self.frame_off, orient='vertical')
+            self.yscrollbar_off = tkinter.ttk.Scrollbar(self.frame_off, orient='vertical')
             self.list_off.pack(side='left', fill='both')
             self.yscrollbar_off.pack(side='right', fill='y')
             self.list_off.config(yscrollcommand=self.yscrollbar_off.set)
@@ -237,11 +237,11 @@ class ItemsChoiceFrame(tk.Toplevel):
 
         # ------------------------------------------------- ITEMS ON ---------------------------------------------------
 
-        self.on_frame = ttk.LabelFrame(self.main_frame, text=label_on)
+        self.on_frame = tkinter.ttk.LabelFrame(self.main_frame, text=label_on)
 
         self.list_on = tk.Listbox(self.on_frame)
         self.list_on.config(height=5)
-        self.yscrollbar_on = ttk.Scrollbar(self.on_frame, orient='vertical')
+        self.yscrollbar_on = tkinter.ttk.Scrollbar(self.on_frame, orient='vertical')
         self.list_on.pack(side='left')
         if (len(items_off) or len(items_on))>5:
             self.yscrollbar_on.pack(side='right', fill='y')
@@ -254,7 +254,7 @@ class ItemsChoiceFrame(tk.Toplevel):
 
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        self.button_frame = ttk.Frame(self.main_frame)
+        self.button_frame = tkinter.ttk.Frame(self.main_frame)
         self.button_frame.grid(row=0, column=1, padx=5)
 
         tk.Button(self.button_frame, text='>', command=self.add_selection, bg='grey').pack(side='top', expand='True', fill='both')
@@ -330,18 +330,18 @@ class ItemsChoiceWindow(tk.Toplevel):
         self.output = output
         self.items = items
 
-        self.main_frame = ttk.LabelFrame(self)
+        self.main_frame = tkinter.ttk.LabelFrame(self)
         self.main_frame.pack(expand=True, fill='both')
 
         items_off = list(set(items) - set(items_on))
 
         # ------------------------------------------------- ITEMS ON ---------------------------------------------------
 
-        self.on_frame = ttk.LabelFrame(self.main_frame, text=label_on)
+        self.on_frame = tkinter.ttk.LabelFrame(self.main_frame, text=label_on)
         self.on_frame.grid(row=0, column=0)
 
         self.list_on = tk.Listbox(self.on_frame, width=20)
-        self.yscrollbar_on = ttk.Scrollbar(self.on_frame, orient='vertical')
+        self.yscrollbar_on = tkinter.ttk.Scrollbar(self.on_frame, orient='vertical')
         self.list_on.pack(side='left', fill='both', expand=True)
         self.yscrollbar_on.pack(side='right', fill='y')
         self.list_on.config(yscrollcommand=self.yscrollbar_on.set)
@@ -351,11 +351,11 @@ class ItemsChoiceWindow(tk.Toplevel):
 
         # -------------------------------------------------- ITEMS OFF -------------------------------------------------
 
-        self.frame_off = ttk.LabelFrame(self.main_frame, text=label_off)
+        self.frame_off = tkinter.ttk.LabelFrame(self.main_frame, text=label_off)
         self.frame_off.grid(row=0, column=2)
 
         self.list_off = tk.Listbox(self.frame_off, width=20)  # list containing element non plotted
-        self.yscrollbar_off = ttk.Scrollbar(self.frame_off, orient='vertical')
+        self.yscrollbar_off = tkinter.ttk.Scrollbar(self.frame_off, orient='vertical')
         self.list_off.pack(side='left', fill='both', expand=True)
         self.yscrollbar_off.pack(side='right', fill='y')
         self.list_off.config(yscrollcommand=self.yscrollbar_off.set)
@@ -365,24 +365,24 @@ class ItemsChoiceWindow(tk.Toplevel):
 
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        self.button_frame = ttk.Frame(self.main_frame)
+        self.button_frame = tkinter.ttk.Frame(self.main_frame)
         self.button_frame.grid(row=0, column=1, padx=5)
 
-        ttk.Button(self.button_frame, text='>', command=self.remove_selection).pack(side='top')
-        ttk.Button(self.button_frame, text='>>', command=self.remove_all).pack(side='top')
-        ttk.Button(self.button_frame, text='<', command=self.add_selection).pack(side='top')
-        ttk.Button(self.button_frame, text='<<', command=self.add_all).pack(side='top')
+        tkinter.ttk.Button(self.button_frame, text='>', command=self.remove_selection).pack(side='top')
+        tkinter.ttk.Button(self.button_frame, text='>>', command=self.remove_all).pack(side='top')
+        tkinter.ttk.Button(self.button_frame, text='<', command=self.add_selection).pack(side='top')
+        tkinter.ttk.Button(self.button_frame, text='<<', command=self.add_all).pack(side='top')
 
         self.list_on.bind('<Double-Button-1>', self.remove_selected)  # remove element when double-clicked
         self.list_off.bind('<Double-Button-1>', self.add_selected)  # add item when double-clicked
 
         # ------------------------------------------------ MAIN BUTTONS ------------------------------------------------
 
-        self.main_button_frame = ttk.Frame(self.main_frame)
+        self.main_button_frame = tkinter.ttk.Frame(self.main_frame)
         self.main_button_frame.grid(row=1, column=0, columnspan=3)
 
-        ttk.Button(self.main_button_frame, text='OK', command=self.save).pack(side='left')
-        ttk.Button(self.main_button_frame, text='Cancel', command=self.cancel).pack(side='right')
+        tkinter.ttk.Button(self.main_button_frame, text='OK', command=self.save).pack(side='left')
+        tkinter.ttk.Button(self.main_button_frame, text='Cancel', command=self.cancel).pack(side='right')
 
     def add_selection(self):
         """ Add selected elements to the 'on' list and remove them from the 'off' list """
@@ -456,27 +456,27 @@ class ColoursChoiceWindow(tk.Toplevel):
         self.parent = parent
         self.output = output
 
-        self.main_frame = ttk.Frame(self)  # Main ttk frame
+        self.main_frame = tkinter.ttk.Frame(self)  # Main ttk frame
         self.main_frame.pack(expand=True, fill='both')
 
         # dictionary for storing the colors with their associated item
-        self.color_dict = dict(zip(items, colors * len(items)))
+        self.color_dict = dict(list(zip(items, colors * len(items))))
         self.items = items
 
-        self.combobox = ttk.Combobox(self.main_frame, values=items, state='readonly')
+        self.combobox = tkinter.ttk.Combobox(self.main_frame, values=items, state='readonly')
         self.combobox.grid(row=0, column=0, padx=5, pady=3)
         self.combobox.bind('<<ComboboxSelected>>', self.get_color)
 
         tk.Label(self.main_frame, text='    ').grid(row=0, column=1)
-        ttk.Button(self.main_frame, text='color', command=self.set_color).grid(row=0, column=2, padx=5, pady=3)
+        tkinter.ttk.Button(self.main_frame, text='color', command=self.set_color).grid(row=0, column=2, padx=5, pady=3)
 
         # ---------------------------------------------------- BUTTONS -------------------------------------------------
 
-        self.main_button_frame = ttk.Frame(self.main_frame)
+        self.main_button_frame = tkinter.ttk.Frame(self.main_frame)
         self.main_button_frame.grid(row=1, column=0, columnspan=3, padx=5, pady=3)
 
-        ttk.Button(self.main_button_frame, text='OK', command=self.validate).pack(side='left', padx=5, pady=3)
-        ttk.Button(self.main_button_frame, text='Cancel', command=self.destroy).pack(side='right', padx=5, pady=3)
+        tkinter.ttk.Button(self.main_button_frame, text='OK', command=self.validate).pack(side='left', padx=5, pady=3)
+        tkinter.ttk.Button(self.main_button_frame, text='Cancel', command=self.destroy).pack(side='right', padx=5, pady=3)
 
     def get_color(self, event):
         """ Retrieve the color associated with the selected item and display it in a label """
@@ -506,25 +506,25 @@ class ColoursChoiceWindow(tk.Toplevel):
         self.destroy()
 
 
-class RangeFrame(ttk.Frame):
+class RangeFrame(tkinter.ttk.Frame):
 
     def __init__(self, parent, low, high, label, unit='', step=None, **kwargs):
 
-        ttk.Frame.__init__(self, parent)
+        tkinter.ttk.Frame.__init__(self, parent)
 
         self.low_var = tk.DoubleVar(value=low)
         self.high_var = tk.DoubleVar(value=high)
 
-        ttk.Label(self, text=label + ': from').pack(side='left')
-        ttk.Entry(self, textvariable=self.low_var, **kwargs).pack(side='left')
-        ttk.Label(self, text=unit + ' to ').pack(side='left')
-        ttk.Entry(self, textvariable=self.high_var, **kwargs).pack(side='left')
-        ttk.Label(self, text=unit).pack(side='left')
+        tkinter.ttk.Label(self, text=label + ': from').pack(side='left')
+        tkinter.ttk.Entry(self, textvariable=self.low_var, **kwargs).pack(side='left')
+        tkinter.ttk.Label(self, text=unit + ' to ').pack(side='left')
+        tkinter.ttk.Entry(self, textvariable=self.high_var, **kwargs).pack(side='left')
+        tkinter.ttk.Label(self, text=unit).pack(side='left')
         if step is not None:
             self.step_var = tk.DoubleVar(value=step)
-            ttk.Label(self, text='  Step: ').pack(side='left')
-            ttk.Entry(self, textvariable=self.step_var, **kwargs).pack(side='left')
-            ttk.Label(self, text=unit).pack(side='left')
+            tkinter.ttk.Label(self, text='  Step: ').pack(side='left')
+            tkinter.ttk.Entry(self, textvariable=self.step_var, **kwargs).pack(side='left')
+            tkinter.ttk.Label(self, text=unit).pack(side='left')
 
 
 class GapInputFrame(tk.Toplevel):
@@ -545,13 +545,13 @@ class GapInputFrame(tk.Toplevel):
         # self.title('Gaps')
         # self.resizable(False, False)
 
-        self.main_frame = ttk.LabelFrame(parent, labelwidget=labeltitle)
+        self.main_frame = tkinter.ttk.LabelFrame(parent, labelwidget=labeltitle)
         # self.main_frame.pack(expand=True, fill='both')
         self.main_frame.grid_columnconfigure(0, weight=1)
 
         # ----------------------------------------------------- INPUT --------------------------------------------------
 
-        self.input_frame = ttk.Frame(self.main_frame)
+        self.input_frame = tkinter.ttk.Frame(self.main_frame)
         self.input_frame.grid(row=0, column=0, sticky='nswe', padx=3, pady=3)
         self.input_frame.grid_columnconfigure(1, weight=1)
 
@@ -559,15 +559,15 @@ class GapInputFrame(tk.Toplevel):
         self.value_var = tk.DoubleVar()
         self.name_var.set('Experimental gap')
 
-        ttk.Label(self.input_frame, text='Gap Name').grid(row=0, column=0)
-        ttk.Entry(self.input_frame, textvariable=self.name_var).grid(row=0, column=1, sticky='we')
+        tkinter.ttk.Label(self.input_frame, text='Gap Name').grid(row=0, column=0)
+        tkinter.ttk.Entry(self.input_frame, textvariable=self.name_var).grid(row=0, column=1, sticky='we')
 
-        ttk.Label(self.input_frame, text='Value (eV)').grid(row=1, column=0)
-        ttk.Entry(self.input_frame, textvariable=self.value_var).grid(row=1, column=1, sticky='we')
+        tkinter.ttk.Label(self.input_frame, text='Value (eV)').grid(row=1, column=0)
+        tkinter.ttk.Entry(self.input_frame, textvariable=self.value_var).grid(row=1, column=1, sticky='we')
 
         # ---------------------------------------------------- BUTTONS -------------------------------------------------
 
-        self.button_frame = ttk.Frame(self.main_frame)
+        self.button_frame = tkinter.ttk.Frame(self.main_frame)
         self.button_frame.grid(row=1, column=0, padx=3, pady=3)
 
         def add_gap():
@@ -591,12 +591,12 @@ class GapInputFrame(tk.Toplevel):
             if len(selection) != 0:
                 self.listbox.delete(selection[0])
 
-        ttk.Button(self.button_frame, text='Add gap', command=add_gap).grid(row=0, column=0)
-        ttk.Button(self.button_frame, text='Remove gap', command=remove_gap).grid(row=0, column=1)
+        tkinter.ttk.Button(self.button_frame, text='Add gap', command=add_gap).grid(row=0, column=0)
+        tkinter.ttk.Button(self.button_frame, text='Remove gap', command=remove_gap).grid(row=0, column=1)
 
         # ------------------------------------------------------ LIST --------------------------------------------------
 
-        self.list_frame = ttk.Frame(self.main_frame)
+        self.list_frame = tkinter.ttk.Frame(self.main_frame)
         self.list_frame.grid(row=2, column=0, sticky='nswe')
 
         self.list_content = tk.StringVar()
@@ -606,7 +606,7 @@ class GapInputFrame(tk.Toplevel):
         if gap_input_var.get().split(';') != ['']:
             [self.listbox.insert(0, f) for f in gap_input_var.get().split(';') if len(f)>0]
 
-        self.yscrollbar = ttk.Scrollbar(self.list_frame, orient='vertical', command=self.listbox.yview)
+        self.yscrollbar = tkinter.ttk.Scrollbar(self.list_frame, orient='vertical', command=self.listbox.yview)
         self.yscrollbar.pack(side='right', fill='y')
 
         self.listbox.configure(yscrollcommand=self.yscrollbar.set)
@@ -614,11 +614,11 @@ class GapInputFrame(tk.Toplevel):
 
         # ------------------------------------------------- MAIN BUTTONS -----------------------------------------------
 
-        self.main_button_frame = ttk.Frame(self.main_frame)
+        self.main_button_frame = tkinter.ttk.Frame(self.main_frame)
         self.main_button_frame.grid(row=3, column=0, padx=3, pady=3)
 
 
-class CustomNotebook(ttk.Notebook):
+class CustomNotebook(tkinter.ttk.Notebook):
     """A ttk Notebook with close buttons on each tab
     From: https://stackoverflow.com/questions/39458337/is-there-a-way-to-add-close-buttons-to-tabs-in-tkinter-ttk-notebook """
 
@@ -631,7 +631,7 @@ class CustomNotebook(ttk.Notebook):
             self.__inititialized = True
 
         kwargs["style"] = "CustomNotebook"
-        ttk.Notebook.__init__(self, *args, **kwargs)
+        tkinter.ttk.Notebook.__init__(self, *args, **kwargs)
 
         self._active = None
         self.last_closed = None
@@ -675,7 +675,7 @@ class CustomNotebook(ttk.Notebook):
 
     def __initialize_custom_style(self):
 
-        style = ttk.Style()
+        style = tkinter.ttk.Style()
         self.images = (
             tk.PhotoImage("img_close", data='''
                 R0lGODlhCAAIAMIBAAAAADs7O4+Pj9nZ2Ts7Ozs7Ozs7Ozs7OyH+EUNyZWF0ZWQg
@@ -713,7 +713,7 @@ class CustomNotebook(ttk.Notebook):
         ])
 
 
-class ModifiableLabel(ttk.Frame):
+class ModifiableLabel(tkinter.ttk.Frame):
 
     def __init__(self, parent, var, funcs=(None, None), **kwargs):
         """
@@ -722,14 +722,14 @@ class ModifiableLabel(ttk.Frame):
         :param funcs: tuple of two functions called
         :param kwargs: passed to entry and label widgets """
 
-        ttk.Frame.__init__(self, parent)
+        tkinter.ttk.Frame.__init__(self, parent)
         self.parent = parent
         self.var = var
         self.funcs = funcs
         self.kwargs = kwargs
 
-        self.label = ttk.Label(self, textvariable=self.var, **self.kwargs)
-        self.entry = ttk.Entry(self, textvariable=self.var, **self.kwargs)
+        self.label = tkinter.ttk.Label(self, textvariable=self.var, **self.kwargs)
+        self.entry = tkinter.ttk.Entry(self, textvariable=self.var, **self.kwargs)
         self.label.bind('<Double-Button-1>', self.show_entry)
         self.entry.bind('<Return>', self.show_label)
         self.entry.bind('<FocusOut>', self.show_label)
@@ -756,7 +756,7 @@ class ScrollableTableFrame(object):
     def __init__(self, main_frame, header, summary):
         self.main_frame = tk.Frame(main_frame)
         # create a canvas object and a vertical scrollbar for scrolling it
-        vscrollbar = ttk.Scrollbar(self.main_frame, orient=VERTICAL)
+        vscrollbar = tkinter.ttk.Scrollbar(self.main_frame, orient=VERTICAL)
         # vscrollbar.pack(fill='y', side=RIGHT, expand=False)
         vscrollbar.grid(row=0, column=1, sticky = 'nse')
         canvas = tk.Canvas(self.main_frame, bd=0, highlightthickness=0,
@@ -814,11 +814,11 @@ class ScrollableTableFrame(object):
         self.main_frame.grid(sticky='nsew')
 
 
-class QuantityEntry(ttk.Frame):
+class QuantityEntry(tkinter.ttk.Frame):
 
     def __init__(self, parent, quantity, initial_value, unit='', **kwargs):
 
-        ttk.Frame.__init__(self, parent)
+        tkinter.ttk.Frame.__init__(self, parent)
 
         if isinstance(initial_value, float):
             self.var = tk.DoubleVar(value=initial_value)
@@ -827,6 +827,6 @@ class QuantityEntry(ttk.Frame):
         else:
             self.var = tk.StringVar()
 
-        ttk.Label(self, text=quantity).pack(side='left')
-        ttk.Entry(self, textvariable=self.var, **kwargs).pack(side='left', padx=1)
-        ttk.Label(self, text=unit).pack(side='left')
+        tkinter.ttk.Label(self, text=quantity).pack(side='left')
+        tkinter.ttk.Entry(self, textvariable=self.var, **kwargs).pack(side='left', padx=1)
+        tkinter.ttk.Label(self, text=unit).pack(side='left')

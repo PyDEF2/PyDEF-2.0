@@ -43,7 +43,7 @@ def get_formation_enthalpy(compound, chem_pot):
         except KeyError:
             nb_at_compound = 0
         mu = float(chem_pot[chem])
-        print chem + ': mu0 = ' + str(mu) + ' eV, nb_at_compound = ' + str(nb_at_compound)
+        print(chem + ': mu0 = ' + str(mu) + ' eV, nb_at_compound = ' + str(nb_at_compound))
         formation_enthalpy -= nb_at_compound * mu
     
     return formation_enthalpy
@@ -89,7 +89,7 @@ class ChemicalPotentials(object):
         
         self.lastppp.domainInequationsList = []
         
-        for nonSynCell in self.non_synthesized.values():
+        for nonSynCell in list(self.non_synthesized.values()):
             stoechratios_list = self.getStoechiometricRatios(nonSynCell, self.lastppp.mu_X_axis, self.lastppp.mu_Y_axis, self.lastppp.const) #CHECK: OK
             # print nonSynCell.display_rname + " " + str(stoechratios_list)
             a_X, a_Y, C = self.calculateInequationCoeffs(nonSynCell, stoechratios_list, chem_pot_dict)
@@ -109,7 +109,7 @@ class ChemicalPotentials(object):
             title_fontsize=self.lastppp.title_fontsize, legend=legend, tight=tight, box=True)
             
         if self.synth_population > 2:
-			ax.legend(handles=legendList, fontsize=self.lastppp.l_fontsize).draggable()
+            ax.legend(handles=legendList, fontsize=self.lastppp.l_fontsize).draggable()
         return figure 
             
     # ------------------------------------------------------ EXPORTS ------------------------------------------------------
@@ -176,8 +176,8 @@ class ChemicalPotentials(object):
         # Draw domains above the stability domain of the studied compound
         length = len(xfrontiersabove)
         for i in range(length):
-			self.draw1Domain(ax, xfrontiersabove[i][2], memr, 2, xmin, xmax, xfrontiersabove[i][0], False, ppp.colors[xfrontiersabove[i][1]])
-			memr = xfrontiersabove[i][2]
+            self.draw1Domain(ax, xfrontiersabove[i][2], memr, 2, xmin, xmax, xfrontiersabove[i][0], False, ppp.colors[xfrontiersabove[i][1]])
+            memr = xfrontiersabove[i][2]
         # Stability domain
         self.draw1Domain(ax, stabdomainl, stabdomainr, 2, xmin, xmax, self.synthesized.display_rname, ppp.hashed, 'white')
         self.domainSummits = np.array([stabdomainl, stabdomainr])
@@ -253,7 +253,7 @@ class ChemicalPotentials(object):
             try:
                 ppp.xmin, ppp.xmax = min(domainSummitsX) - 0.5, max(domainSummitsX) + 0.5
                 ppp.ymin, ppp.ymax = min(domainSummitsY) - 0.5, max(domainSummitsY) + 0.5
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError(self.synthesized.rname + ' Stability Domain Plot: \nNo Domain Summit found in proposed range! You may try a larger range.')
         
         X_axis_sampling = np.linspace(ppp.xmin, ppp.xmax, 1000)
@@ -379,7 +379,7 @@ class ChemicalPotentials(object):
         else:
             sumSyn = 0
             sumNonSyn = 0
-            for elt in chem_pot_dict.keys():
+            for elt in list(chem_pot_dict.keys()):
                 sumSyn += getVal(elt, self.synthesized.population)*chem_pot_dict[elt]
                 sumNonSyn += getVal(elt, nonsyncell.population)*chem_pot_dict[elt]
             return [sumSyn, sumNonSyn]
@@ -394,11 +394,11 @@ class ChemicalPotentials(object):
         
         try:
             C = float(n_list[4] * (get_formation_enthalpy(nonsyncell, chem_pot_dict) - sumSyn) - n_list[5] * (get_formation_enthalpy(self.synthesized, chem_pot_dict) - sumNonSyn))
-        except TypeError, e:
+        except TypeError as e:
             message = 'Warning! ' + nonsyncell.treetitle
             message += ' is not an energy calculation, it will not be included in the '
             message += 'Domain Stability plot. It is strongly advised to remove it from Chemical Potentials object'        
-            print message
+            print(message)
             return a_X, a_Y, 0
         
         return a_X, a_Y, C
@@ -426,7 +426,7 @@ class ChemicalPotentials(object):
                 ineq = "mu_" + mu_X_axis + ">=" + str(round(C/a_X, 3))
                 return C/a_X, False, ineq
             else:
-                print 'Warning! Division by zero avoided by ignoring one frontier!'
+                print('Warning! Division by zero avoided by ignoring one frontier!')
                 return lambda x: 0, False, ''
 
 
@@ -456,7 +456,7 @@ class PotentialsPlotParameters(pf.PlotParameters):
         
         self.colorList = ['red', 'blue', 'green', 'yellow', 'orange', 'aqua', 'magenta', 'olive' ]
         
-        self.colors = dict(zip([cell.ID for cell in chem_pot.non_synthesized.values()], self.colorList))
+        self.colors = dict(list(zip([cell.ID for cell in list(chem_pot.non_synthesized.values())], self.colorList)))
         
         self.title = 'Stability domain of $' +  chem_pot.synthesized.display_rname + '$' # Title of the plot
         self.hashed = True

@@ -1,11 +1,11 @@
-import Tkinter as tk
-from Tkinter import Tk, Frame, Menu, Button, Label, Canvas, Scrollbar
-from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, SUNKEN, ALL, VERTICAL, W
+import tkinter as tk
+from tkinter import Tk, Frame, Menu, Button, Label, Canvas, Scrollbar
+from tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, SUNKEN, ALL, VERTICAL, W
 
 import copy
 
-import ttk
-from tkColorChooser import askcolor              
+import tkinter.ttk
+from tkinter.colorchooser import askcolor              
 
 import tkinter_utilities as tu
 
@@ -26,7 +26,7 @@ class DefectStudyPlotParametersWindow(tk.Toplevel):
         self.project = self.mainwindow.projects[self.mainwindow.currentprojectid]
         self.fpp = defect_study.fpp
 
-        self.main_frame = ttk.Frame(self)
+        self.main_frame = tkinter.ttk.Frame(self)
         self.main_frame.pack(expand=True, fill='both')
         self.main_frame.grid_columnconfigure(0, weight=1)
 
@@ -35,14 +35,14 @@ class DefectStudyPlotParametersWindow(tk.Toplevel):
         # ---------------------------------------------- FPP PARAMS ------------------------------------------------
         
         self.label0 = tk.Label(self.main_frame, text='Formation Energy Plot Specific Parameters', font='-weight bold')
-        self.fpp_param_frame = ttk.LabelFrame(self.main_frame, labelwidget=self.label0)
+        self.fpp_param_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=self.label0)
         self.fpp_param_frame.grid(sticky='nsew')
         
         self.display_transition_levels_var = tk.BooleanVar(value=self.fpp.display_transition_levels)
-        ttk.Checkbutton(self.fpp_param_frame, text='Display Transition Levels', variable=self.display_transition_levels_var, onvalue=True, offvalue=False).grid(row=0, column=1, sticky=W)
+        tkinter.ttk.Checkbutton(self.fpp_param_frame, text='Display Transition Levels', variable=self.display_transition_levels_var, onvalue=True, offvalue=False).grid(row=0, column=1, sticky=W)
         
         self.display_charges_var = tk.BooleanVar(value=self.fpp.display_charges)
-        ttk.Checkbutton(self.fpp_param_frame, text='Display Charges', variable=self.display_charges_var, onvalue=True, offvalue=False).grid(row=1, column=1, sticky=W)
+        tkinter.ttk.Checkbutton(self.fpp_param_frame, text='Display Charges', variable=self.display_charges_var, onvalue=True, offvalue=False).grid(row=1, column=1, sticky=W)
                 
         # ---------------------------------------------- DISPLAY PARAMS ------------------------------------------------
         
@@ -51,12 +51,12 @@ class DefectStudyPlotParametersWindow(tk.Toplevel):
         
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        buttons_frame = ttk.Frame(self.main_frame)
+        buttons_frame = tkinter.ttk.Frame(self.main_frame)
         buttons_frame.grid(row=3, column=0, pady=3, sticky='nsew')
 
-        ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
-        ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
-        ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
         
     def save(self, close=False):
         try:
@@ -69,7 +69,7 @@ class DefectStudyPlotParametersWindow(tk.Toplevel):
             if close:
                 self.destroy()
         except ValueError:
-            print 'Warning! Please specify range values as float values'
+            print('Warning! Please specify range values as float values')
             
             
 class MaterialStudyPlotParametersWindow(tk.Toplevel):
@@ -83,7 +83,7 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         self.project = self.mainwindow.projects[self.mainwindow.currentprojectid]
         self.fpp = material_study.lastfpp
 
-        self.main_frame = ttk.Frame(self)
+        self.main_frame = tkinter.ttk.Frame(self)
         self.main_frame.pack(expand=True, fill='both')
         self.main_frame.grid_columnconfigure(0, weight=1)
 
@@ -95,8 +95,8 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         
         self.nameframe = tk.Frame(self.main_frame)
         self.nameframe.grid(row=1, column=0)
-        namelist = [fpp.name for fpp in self.project.pp['fpp'].values()]
-        self.fppname = ttk.Combobox(self.nameframe, values=namelist, width=40) 
+        namelist = [fpp.name for fpp in list(self.project.pp['fpp'].values())]
+        self.fppname = tkinter.ttk.Combobox(self.nameframe, values=namelist, width=40) 
         self.fppname.set(self.fpp.name)
         self.fppname.bind("<<ComboboxSelected>>", self.fpp_select)
         self.label0.grid(row=0, column=0)
@@ -106,17 +106,17 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         # ---------------------------------------------- FPP PARAMS ------------------------------------------------
         
         self.label0 = tk.Label(self.main_frame, text='Formation Energy Plot Specific Parameters', font='-weight bold')
-        self.fpp_param_frame = ttk.LabelFrame(self.main_frame, labelwidget=self.label0)
+        self.fpp_param_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=self.label0)
         self.fpp_param_frame.grid(sticky='nsew')
         
         self.display_charges_var = tk.BooleanVar(value=self.fpp.display_charges)
-        ttk.Checkbutton(self.fpp_param_frame, text='Display Charges', variable=self.display_charges_var, onvalue=True, offvalue=False).grid(row=0, column=1, sticky=W)
+        tkinter.ttk.Checkbutton(self.fpp_param_frame, text='Display Charges', variable=self.display_charges_var, onvalue=True, offvalue=False).grid(row=0, column=1, sticky=W)
         
         self.highlight_charge_change_var = tk.BooleanVar(value=self.fpp.highlight_charge_change)
-        ttk.Checkbutton(self.fpp_param_frame, text='Highlight Charge Transition Levels', variable=self.highlight_charge_change_var, onvalue=True, offvalue=False).grid(row=1, column=1, sticky=W)
+        tkinter.ttk.Checkbutton(self.fpp_param_frame, text='Highlight Charge Transition Levels', variable=self.highlight_charge_change_var, onvalue=True, offvalue=False).grid(row=1, column=1, sticky=W)
         
         self.display_gaps_legend_var = tk.BooleanVar(value=self.fpp.display_gaps_legend)
-        ttk.Checkbutton(self.fpp_param_frame, text='Display Gap Legend', variable=self.display_gaps_legend_var, onvalue=True, offvalue=False).grid(row=2, column=1, sticky=W)
+        tkinter.ttk.Checkbutton(self.fpp_param_frame, text='Display Gap Legend', variable=self.display_gaps_legend_var, onvalue=True, offvalue=False).grid(row=2, column=1, sticky=W)
                 
         # ---------------------------------------------- DISPLAY PARAMS ------------------------------------------------
         
@@ -125,7 +125,7 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         
         # ---------------------------------------------- COLORS ------------------------------------------------
         self.label2 = tk.Label(self.main_frame, text='Colors', font='-weight bold')
-        self.colors_pane = ttk.LabelFrame(self.main_frame, labelwidget=self.label2)
+        self.colors_pane = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=self.label2)
         self.colors = {}
         index = 0 
         for def_stud in material_study.ds_list:
@@ -138,12 +138,12 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        buttons_frame = ttk.Frame(self.main_frame)
+        buttons_frame = tkinter.ttk.Frame(self.main_frame)
         buttons_frame.grid(row=5, column=0, pady=3, sticky='nsew')
 
-        ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
-        ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
-        ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
         
     
     def set_color(self, def_stud_ID):
@@ -160,7 +160,7 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
             if close:
                 self.destroy()
         except ValueError:
-            print 'Warning! Please specify range values as float values'
+            print('Warning! Please specify range values as float values')
     
     
     def update_window(self):
@@ -172,7 +172,7 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         self.display_charges_var = self.fpp.display_charges
         self.highlight_charge_change_var = self.fpp.highlight_charge_change
         self.display_gaps_legend_var = self.fpp.display_gaps_legend
-        for key in self.fpp.colors.keys():
+        for key in list(self.fpp.colors.keys()):
             self.colors[key].configure(bg=self.fpp.colors[key])
 
             
@@ -182,7 +182,7 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
             self.mainwindow.projects[self.mainwindow.currentprojectid].cells[self.mainwindow.currentitemid].lastfpp = self.fpp
             self.update_window()
         except KeyError:
-            print 'Please select existing parameters in the list or create new ones with the button'
+            print('Please select existing parameters in the list or create new ones with the button')
     
     
     def fpp_create(self, event=None):
@@ -191,9 +191,9 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
         self.project.pp['fpp'][self.fppname.get()] = newfpp
         self.fpp = newfpp 
         self.mainwindow.projects[self.mainwindow.currentprojectid].material_studies[self.mainwindow.currentitemid].lastfpp = newfpp
-        namelist = [fpp.name for fpp in self.project.pp['fpp'].values()]
+        namelist = [fpp.name for fpp in list(self.project.pp['fpp'].values())]
         self.fppname.configure(values=namelist)
-        print 'Created new Defect Formation Energies Plot Parameters ' + self.fpp.name + ' in Project ' + self.mainwindow.projects[self.mainwindow.currentprojectid].name
+        print('Created new Defect Formation Energies Plot Parameters ' + self.fpp.name + ' in Project ' + self.mainwindow.projects[self.mainwindow.currentprojectid].name)
 
 
     def save(self, close=False):
@@ -213,7 +213,7 @@ class MaterialStudyPlotParametersWindow(tk.Toplevel):
             if close:
                 self.destroy()
         except ValueError:
-            print 'Warning! Please specify range values as float values'
+            print('Warning! Please specify range values as float values')
             
             
 class MaterialStudyExportWindow(tk.Toplevel):
@@ -274,11 +274,11 @@ class MaterialStudyCreationWindow(tk.Toplevel):
         if project.hostcellid == '':
             self.mainwindow.printerror('Current project has no host cell! Please declare the perfect cell as host before creating any Material Study.')
             
-        items = [defstud.treetitle for defstud in self.project.defect_studies.values()]
+        items = [defstud.treetitle for defstud in list(self.project.defect_studies.values())]
         
         if self.material_study is not None:    
             label_on = self.material_study.treetitle + ' Defect Studies' 
-            items_on = [defect_study.treetitle for defect_study in self.material_study.defect_studies.values()]
+            items_on = [defect_study.treetitle for defect_study in list(self.material_study.defect_studies.values())]
         else:
             label_on = 'New Material Study\'s Defect Studies' 
             items_on = []
@@ -292,12 +292,12 @@ class MaterialStudyCreationWindow(tk.Toplevel):
         def validate(close=False):
             self.attributes('-topmost', True)
             ds_choice = self.defect_studies_choice_frame.get_choice()
-            find_ds_to_add = [def_study for title in ds_choice for def_study in self.mainwindow.projects[self.mainwindow.currentprojectid].defect_studies.values() if def_study.treetitle == title]
+            find_ds_to_add = [def_study for title in ds_choice for def_study in list(self.mainwindow.projects[self.mainwindow.currentprojectid].defect_studies.values()) if def_study.treetitle == title]
             if len(ds_choice) == 0:
-                find_ds_to_remove = [def_study for def_study in self.material_study.defect_studies.values()]
+                find_ds_to_remove = [def_study for def_study in list(self.material_study.defect_studies.values())]
             else:
                 if self.material_study is not None:
-                    find_ds_to_remove = [def_study for def_study in self.material_study.defect_studies.values() if def_study.treetitle not in ds_choice]
+                    find_ds_to_remove = [def_study for def_study in list(self.material_study.defect_studies.values()) if def_study.treetitle not in ds_choice]
                 else:
                     find_ds_to_remove = []
             if self.edit is False:
@@ -306,14 +306,14 @@ class MaterialStudyCreationWindow(tk.Toplevel):
                 self.mainwindow.pm.new_material_study(self.material_study, self.project.pid)                
             else:
                 for def_study in find_ds_to_add:
-                    print 'Adding defect study ' + def_study.treetitle + ' to Material Study ' + self.material_study.treetitle
+                    print('Adding defect study ' + def_study.treetitle + ' to Material Study ' + self.material_study.treetitle)
                     self.mainwindow.pm.add_defect_study_to_material_study(def_study, self.material_study, self.project.pid)
                 for def_study in find_ds_to_remove:
                     self.mainwindow.pm.remove_defect_study_to_material_study(def_study, self.material_study, self.project.pid)
             if len(self.material_study.defect_studies)>0:
                 self.plot(close=close)
             else:
-                print 'Warning! Impossible to plot Defect Formation Energies for empty Material Study ' + self.material_study.treetitle
+                print('Warning! Impossible to plot Defect Formation Energies for empty Material Study ' + self.material_study.treetitle)
                 if close :
                     self.cancel()
 
@@ -346,7 +346,7 @@ class SummaryWindow(tk.Toplevel):
         summary = material_study.summary()
         
         # create a canvas object and a vertical scrollbar for scrolling it
-        vscrollbar = ttk.Scrollbar(self.main_frame, orient=VERTICAL)
+        vscrollbar = tkinter.ttk.Scrollbar(self.main_frame, orient=VERTICAL)
         # vscrollbar.pack(fill='y', side=RIGHT, expand=False)
         vscrollbar.grid(row=0, column=1, sticky = 'nse')
         canvas = tk.Canvas(self.main_frame, bd=0, highlightthickness=0,
@@ -418,11 +418,11 @@ class MaterialStudyEnergyPlotParametersWindow(tk.Toplevel):
         self.material_study = material_study
         self.fpp = fpp
 
-        self.main_frame = ttk.Frame(self)
+        self.main_frame = tkinter.ttk.Frame(self)
         self.main_frame.pack(expand=True, fill='both')
         self.main_frame.grid_columnconfigure(0, weight=1)
 
-        ttk.Label(self.main_frame, text=material_study.treetitle, font='-weight bold -size 30').grid(padx=20, pady=20)
+        tkinter.ttk.Label(self.main_frame, text=material_study.treetitle, font='-weight bold -size 30').grid(padx=20, pady=20)
 
         # Energy range
         self.e_range = tu.RangeFrame(self.main_frame, fpp.energy_range[0], fpp.energy_range[1], 'Fermi energy', 'eV', width=7)
@@ -430,31 +430,31 @@ class MaterialStudyEnergyPlotParametersWindow(tk.Toplevel):
 
         # Transition levels highlight
         self.tr_levels_var = tk.BooleanVar(value=fpp.highlight_charge_change)
-        ttk.Checkbutton(self.main_frame, text='Highlight transition levels', onvalue=True, offvalue=False,
+        tkinter.ttk.Checkbutton(self.main_frame, text='Highlight transition levels', onvalue=True, offvalue=False,
                         var=self.tr_levels_var).grid(sticky=W, padx=5, pady=5)
 
         # Charge display
         self.charge_display_var = tk.BooleanVar(value=fpp.display_charges)
-        ttk.Checkbutton(self.main_frame, text='Show charges', onvalue=True, offvalue=False, var=self.charge_display_var
+        tkinter.ttk.Checkbutton(self.main_frame, text='Show charges', onvalue=True, offvalue=False, var=self.charge_display_var
                         ).grid(sticky=W, padx=5, pady=5)
 
         # Colors
         self.color_choice = None
-        ttk.Button(self.main_frame, text='Colours', command=self.open_color_choice
+        tkinter.ttk.Button(self.main_frame, text='Colours', command=self.open_color_choice
                    ).grid(sticky=W, padx=5, pady=5)
 
         # Gap legend display
         self.gap_var = tk.BooleanVar(value=fpp.display_gaps_legend)
-        ttk.Checkbutton(self.main_frame, text='Show charges', onvalue=True, offvalue=False, var=self.gap_var
+        tkinter.ttk.Checkbutton(self.main_frame, text='Show charges', onvalue=True, offvalue=False, var=self.gap_var
                         ).grid(sticky=W, padx=5, pady=5)
 
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        buttons_frame = ttk.Frame(self.main_frame)
+        buttons_frame = tkinter.ttk.Frame(self.main_frame)
         buttons_frame.grid(pady=5, padx=5)
 
-        ttk.Button(buttons_frame, text='OK', command=self.validate).pack(side='left', padx=5)
-        ttk.Button(buttons_frame, text='Cancel', command=self.destroy).pack(side='left', padx=5)
+        tkinter.ttk.Button(buttons_frame, text='OK', command=self.validate).pack(side='left', padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Cancel', command=self.destroy).pack(side='left', padx=5)
 
     def open_color_choice(self):
 
@@ -488,7 +488,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
 
         self.cpp = material_study.cpp
 
-        self.main_frame = ttk.Frame(self)
+        self.main_frame = tkinter.ttk.Frame(self)
         self.main_frame.grid(sticky='nsew')
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.title(material_study.treetitle + ' Defect Concentrations Plot Parameters Window')
@@ -496,7 +496,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
         # --------------------------------------------- EFFECTIVE MASSE --------------------------------------------------
 
         label0 = tk.Label(self.main_frame, text='Charge Carriers Effective Masses', font='-weight bold')
-        masses_frame = ttk.LabelFrame(self.main_frame, labelwidget=label0)
+        masses_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label0)
         masses_frame.grid(sticky='nsew')
         
         self.m_e_entry = tu.QuantityEntry(masses_frame, 'Electrons effective mass', self.cpp.m_e, ' me', width=5)
@@ -507,7 +507,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
         # --------------------------------------------- TEMPERATURES --------------------------------------------------
 
         label1 = tk.Label(self.main_frame, text='Temperatures', font='-weight bold')
-        temperature_frame = ttk.LabelFrame(self.main_frame, labelwidget=label1)
+        temperature_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label1)
         temperature_frame.grid()
 
         tk.Label(temperature_frame, text='Ambiant Temperature (fixed) ').grid(row=0, column=0)
@@ -522,13 +522,13 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
         self.fill_type_var = tk.IntVar(value=self.cpp.fill_type)
         
         label11 = tk.Label(self.main_frame, text='Specific options', font='-weight bold')
-        options_frame = ttk.LabelFrame(self.main_frame, labelwidget=label11)
+        options_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label11)
         options_frame.grid(sticky='nsew')
         
         # Display charge carriers
-        ttk.Checkbutton(options_frame, text='Display charge carriers concentrations ', variable=self.charge_carriers_var, command=self.set_display_charge_carriers).pack(side='left')
+        tkinter.ttk.Checkbutton(options_frame, text='Display charge carriers concentrations ', variable=self.charge_carriers_var, command=self.set_display_charge_carriers).pack(side='left')
         # Fill conductivity type
-        ttk.Checkbutton(options_frame, text='Fill conductivity type ', variable=self.fill_type_var, command=self.set_fill_type).pack(side='left')
+        tkinter.ttk.Checkbutton(options_frame, text='Fill conductivity type ', variable=self.fill_type_var, command=self.set_fill_type).pack(side='left')
         
         # ---------------------------------------------- DISPLAY PARAMS ------------------------------------------------
         
@@ -537,7 +537,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
         
         # ---------------------------------------------- COLORS ------------------------------------------------
         self.label2 = tk.Label(self.main_frame, text='Colors', font='-weight bold')
-        self.colors_pane = ttk.LabelFrame(self.main_frame, labelwidget=self.label2)
+        self.colors_pane = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=self.label2)
         self.colors = {}
         self.labels = {}
         self.index = 0 
@@ -547,7 +547,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
                 return key
             else:
                 return self.material_study.defect_studies[key].treetitle
-        sort_list = [[key, title(key)] for key in self.cpp.colors.keys()]
+        sort_list = [[key, title(key)] for key in list(self.cpp.colors.keys())]
         sort_list.sort(key=lambda x: x[1])
         
         for key, treetitle in sort_list:
@@ -562,12 +562,12 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
         
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        buttons_frame = ttk.Frame(self.main_frame)
+        buttons_frame = tkinter.ttk.Frame(self.main_frame)
         buttons_frame.grid(row=5, column=0, pady=3, sticky='nsew')
 
-        ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
-        ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
-        ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
     
     def set_display_charge_carriers(self):
         self.cpp.charge_carriers = self.charge_carriers_var.get()
@@ -603,7 +603,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
                 self.cpp.data_id += ['n (electrons)', 'n (holes)']
             for key in ['n (electrons)', 'n (holes)', 'n type', 'p type']:
                 self.index += 1
-                if key not in self.colors.keys():
+                if key not in list(self.colors.keys()):
                     self.colors[key] = tk.Button(self.colors_pane, text='\t\t', bg=self.cpp.colors[key], command=lambda port = key: self.set_color(port))
                     self.colors[key].grid(row=self.index, column=0, sticky='w')
                     self.labels[key] = tk.Label(self.colors_pane, text=key)
@@ -630,7 +630,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
         except ValueError:
             self.cpp.m_e = None
             self.cpp.m_h = None
-            print 'Warning! At least one of the effective masses is not specified, both are set to None'
+            print('Warning! At least one of the effective masses is not specified, both are set to None')
         try:
             self.cpp.temperature = float(self.cte_temp.var.get())
             self.display_param.write_in_pp(self.cpp)
@@ -642,7 +642,7 @@ class ConcentrationsPlotParametersWindow(tk.Toplevel):
             if close:
                 self.destroy()
         except ValueError:
-            print 'Warning! Please specify range values as float values'
+            print('Warning! Please specify range values as float values')
 
 class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
 
@@ -656,7 +656,7 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
 
         self.ccpp = material_study.ccpp
 
-        self.main_frame = ttk.Frame(self)
+        self.main_frame = tkinter.ttk.Frame(self)
         self.main_frame.grid(sticky='nsew')
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.title(material_study.treetitle + ' Charge Carriers Concentrations Plot Parameters Window')
@@ -664,7 +664,7 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
         # --------------------------------------------- EFFECTIVE MASSE --------------------------------------------------
 
         label0 = tk.Label(self.main_frame, text='Charge Carriers Effective Masses', font='-weight bold')
-        masses_frame = ttk.LabelFrame(self.main_frame, labelwidget=label0)
+        masses_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label0)
         masses_frame.grid(sticky='nsew')
         
         self.m_e_entry = tu.QuantityEntry(masses_frame, 'Electrons effective mass', self.ccpp.m_e, ' me', width=5)
@@ -675,7 +675,7 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
         # --------------------------------------------- TEMPERATURES --------------------------------------------------
 
         label1 = tk.Label(self.main_frame, text='Temperatures', font='-weight bold')
-        temperature_frame = ttk.LabelFrame(self.main_frame, labelwidget=label1)
+        temperature_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label1)
         temperature_frame.grid()
 
         tk.Label(temperature_frame, text='Growth Temperature (fixed) ').grid(row=0, column=0)
@@ -694,7 +694,7 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
         
         # ---------------------------------------------- COLORS ------------------------------------------------
         self.label2 = tk.Label(self.main_frame, text='Colors', font='-weight bold')
-        self.colors_pane = ttk.LabelFrame(self.main_frame, labelwidget=self.label2)
+        self.colors_pane = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=self.label2)
         self.colors = {}
         self.labels = {}
         self.index = 0 
@@ -710,12 +710,12 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
 
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        buttons_frame = ttk.Frame(self.main_frame)
+        buttons_frame = tkinter.ttk.Frame(self.main_frame)
         buttons_frame.grid(row=5, column=0, pady=3, sticky='nsew')
 
-        ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
-        ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
-        ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
     
     def set_color(self, def_stud_ID):
         self.ccpp.colors[def_stud_ID] = askcolor(parent=self)[1]
@@ -730,7 +730,7 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
         except ValueError:
             self.ccpp.m_e = None
             self.ccpp.m_h = None
-            print 'Warning! At least one of the effective masses is not specified, both are set to None'
+            print('Warning! At least one of the effective masses is not specified, both are set to None')
         try:
             self.ccpp.temperature = float(self.cte_temp.var.get())
             self.display_param.write_in_pp(self.ccpp)
@@ -742,7 +742,7 @@ class ChargeCarriersConcentrationsPlotParametersWindow(tk.Toplevel):
             if close:
                 self.destroy()
         except ValueError:
-            print 'Warning! Please specify range values as float values'
+            print('Warning! Please specify range values as float values')
 
         self.destroy()
         
@@ -759,7 +759,7 @@ class FermiLevelVariationsPlotParametersWindow(tk.Toplevel):
 
         self.eftpp = material_study.eftpp
 
-        self.main_frame = ttk.Frame(self)
+        self.main_frame = tkinter.ttk.Frame(self)
         self.main_frame.grid(sticky='nsew')
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.title(material_study.treetitle + ' Fermi Level Variations Plot Parameters Window')
@@ -767,7 +767,7 @@ class FermiLevelVariationsPlotParametersWindow(tk.Toplevel):
         # --------------------------------------------- EFFECTIVE MASSE --------------------------------------------------
 
         label0 = tk.Label(self.main_frame, text='Charge Carriers Effective Masses', font='-weight bold')
-        masses_frame = ttk.LabelFrame(self.main_frame, labelwidget=label0)
+        masses_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label0)
         masses_frame.grid(sticky='nsew')
         
         self.m_e_entry = tu.QuantityEntry(masses_frame, 'Electrons effective mass', self.eftpp.m_e, ' me', width=5)
@@ -778,7 +778,7 @@ class FermiLevelVariationsPlotParametersWindow(tk.Toplevel):
         # --------------------------------------------- TEMPERATURES --------------------------------------------------
 
         label1 = tk.Label(self.main_frame, text='Temperatures', font='-weight bold')
-        temperature_frame = ttk.LabelFrame(self.main_frame, labelwidget=label1)
+        temperature_frame = tkinter.ttk.LabelFrame(self.main_frame, labelwidget=label1)
         temperature_frame.grid()
 
         tk.Label(temperature_frame, text='Growth Temperature (fixed) ').grid(row=0, column=0)
@@ -797,12 +797,12 @@ class FermiLevelVariationsPlotParametersWindow(tk.Toplevel):
         
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        buttons_frame = ttk.Frame(self.main_frame)
+        buttons_frame = tkinter.ttk.Frame(self.main_frame)
         buttons_frame.grid(row=5, column=0, pady=3, sticky='nsew')
 
-        ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
-        ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
-        ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
+        tkinter.ttk.Button(buttons_frame, text='Cancel', command=self.destroy).grid(row=0, column=2, padx=5)
     
     def save(self, close=False):
         try:
@@ -813,7 +813,7 @@ class FermiLevelVariationsPlotParametersWindow(tk.Toplevel):
         except ValueError:
             self.eftpp.m_e = None
             self.eftpp.m_h = None
-            print 'Warning! At least one of the effective masses is not specified, both are set to None'
+            print('Warning! At least one of the effective masses is not specified, both are set to None')
         try:
             self.eftpp.temperature = float(self.cte_temp.var.get())
             self.display_param.write_in_pp(self.eftpp)
@@ -825,6 +825,6 @@ class FermiLevelVariationsPlotParametersWindow(tk.Toplevel):
             if close:
                 self.destroy()
         except ValueError:
-            print 'Warning! Please specify range values as float values'
+            print('Warning! Please specify range values as float values')
 
         self.destroy()

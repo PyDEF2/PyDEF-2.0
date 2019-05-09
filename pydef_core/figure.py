@@ -1,8 +1,3 @@
-"""
-    version: 1.0.0
-"""
-
-
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.text
@@ -19,7 +14,7 @@ def convert_string_to_pymath(strin):
 
 def get_screen_size():
     """ Return the screen size in inches """
-    import Tkinter as tk
+    import tkinter as tk
     root = tk.Tk()
     width = root.winfo_screenmmwidth() * 0.0393701
     height = root.winfo_screenmmheight() * 0.0393701
@@ -49,7 +44,7 @@ def auto_ax(ax=None):
 
 
 def set_ax_parameters(ax, title='', xlabel='', ylabel='', xlim=None, ylim=None, legend=True, grid=True, xticks=True,
-                      yticks=True, xtick_labels=True, ytick_label=True, fontsize=24, l_fontsize=24, title_fontsize=24,
+                      yticks=True, xtick_labels=True, ytick_labels=True, fontsize=24, l_fontsize=24, title_fontsize=24,
                       xlog=False, ylog=False, tight=True, box=False):
 
     figure = ax.get_figure()
@@ -84,25 +79,25 @@ def set_ax_parameters(ax, title='', xlabel='', ylabel='', xlim=None, ylim=None, 
 
     # Ticks labels
     if xtick_labels:
-        ax.tick_params(labelbottom='on', labelsize=fontsize)
+        ax.tick_params(labelbottom=True, labelsize=fontsize, length=10)
     else:
-        ax.tick_params(labelbottom='off', labelsize=fontsize)
+        ax.tick_params(labelbottom=False, labelsize=fontsize)
 
-    if ytick_label:
-        ax.tick_params(labelleft='on', labelsize=fontsize)
+    if ytick_labels:
+        ax.tick_params(labelleft=True, labelsize=fontsize, length=10)
     else:
-        ax.tick_params(labelleft='off', labelsize=fontsize)
+        ax.tick_params(labelleft=False, labelsize=fontsize)
 
     # Grid
     if grid:
-        ax.grid('on')
+        ax.grid(True)
     else:
-        ax.grid('off')
+        ax.grid(False)
 
     # Legend
     if legend:
         try:
-            ax.legend(fontsize=l_fontsize).draggable()
+            ax.legend(fontsize=l_fontsize).set_draggable(True)
         except AttributeError:
             pass
     else:
@@ -125,12 +120,25 @@ def set_ax_parameters(ax, title='', xlabel='', ylabel='', xlim=None, ylim=None, 
     if tight:
         figure.tight_layout()
     
-    if len(figure.axes)==1:
-        plt.subplots_adjust(left=0.1, bottom=0.15, right=0.9, top=0.9, wspace=0.2, hspace=0.2)
+    try:
+        if len(figure.axes)==1:
+            plt.subplots_adjust(left=0.2, bottom=0.2, right=0.9, top=0.9, wspace=0.2, hspace=0.2)
+    except ValueError as e:
+        print('Sorry, did not manage to resize box...')
     
     if box is False:
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
+
+def reorder_legend(ax, labels_order):
+    """param labels_order: list of labels in the desired order
+    Warning! all labels in labels_roder must be in the initial legend"""
+    handles, labels = ax.get_legend_handles_labels()
+    leg_dict = dict(list(zip(labels, handles)))
+
+    handles = [leg_dict[label] for label in labels_order]
+    ax.legend_.remove()
+    ax.legend(handles, labels_order, fontsize=24).set_draggable(True)
     
 
 class PlotParameters(object):

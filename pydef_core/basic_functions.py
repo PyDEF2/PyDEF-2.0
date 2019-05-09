@@ -3,7 +3,7 @@ import fractions
 import copy
 import os
 
-
+k_b=8.617e-5 #Boltzman Constant
 # -------------------------------------------------- PYVALENCE EXCEPTIONS --------------------------------------------------
 
 class PyDEFImportError(Exception):
@@ -65,9 +65,9 @@ def grep(content, string1, line_nb=False, string2=False, data_type='str', nb_fou
     >>> grep(content, 'number is', 0, data_type='int', nb_found=1)
     3"""
     if type(string1) is list:
-        found = [[f, g] for f, g in zip(content, range(len(content))) if string1[0] == f]
+        found = [[f, g] for f, g in zip(content, list(range(len(content)))) if string1[0] == f]
     else:
-        found = [[f, g] for f, g in zip(content, range(len(content))) if string1 in f]
+        found = [[f, g] for f, g in zip(content, list(range(len(content)))) if string1 in f]
 
     if len(found) == 0:
         return None  # Return None if nothing was found
@@ -75,7 +75,7 @@ def grep(content, string1, line_nb=False, string2=False, data_type='str', nb_fou
     if isinstance(nb_found, int):
         if len(found) != nb_found:
             # raise AssertionError()
-            print 'Warning! Found ' + str(len(found)) + ' times \"' + string1 + '\" instead of ' + str(nb_found) + ' as expected'
+            print('Warning! Found ' + str(len(found)) + ' times \"' + string1 + '\" instead of ' + str(nb_found) + ' as expected')
 
     if line_nb is False:
         # print('%s elements found' % len(found))
@@ -124,7 +124,8 @@ def get_gcd(alist):
     :param alist: list of integers
     :return: GCD of the integers
     """
-
+    if len(alist)<2:
+        return alist[0]
     gcd = fractions.gcd(alist[0], alist[1])
     for f in range(2, len(alist)):
         gcd = fractions.gcd(gcd, alist[f])
@@ -193,7 +194,7 @@ def choose_in(keys, values, choices):
     :param values: list of values
     :param choices: list of choices """
 
-    dictionary = dict(zip(keys, values))
+    dictionary = dict(list(zip(keys, values)))
     return [dictionary[key] for key in choices]
 
 
@@ -233,7 +234,7 @@ def add_object_to_dict(obj, container):
     :param obj: any pydef object
     :param container: dictionary """
 
-    obj.ID = handle_same_string(obj.ID, container.keys())
+    obj.ID = handle_same_string(obj.ID, list(container.keys()))
     container[obj.ID] = obj
 
 
@@ -267,7 +268,7 @@ def check_cells_consistency(cell1, cell2):
     c2 = cell2.cell_parameters
     c_diff = c1 - c2
     if any(np.concatenate(c_diff) > np.ones(9) * 0.001):
-        print('Warning! Significant difference between the host cell and the defect cell parameters: %s' % c_diff)
+        print(('Warning! Significant difference between the host cell and the defect cell parameters: %s' % c_diff))
         
         
 def moving_avg(arglist, n):

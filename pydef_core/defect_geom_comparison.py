@@ -122,9 +122,9 @@ class GeomComparison:
         self.perfect_cell_atoms_coordinates = toFracCoord(self.perfect_cell_atoms_coordinates,self.metrics)
         self.defect_cell_atoms_coordinates = toFracCoord(self.defect_cell_atoms_coordinates,self.metrics)     
 
-        print 'Comparing Geometry of ' + self.defect_cell.treetitle + ' to host cell (' + self.perfect_cell.treetitle + ')...\n'
-        print perfect_compound_name + ': %i atoms loaded from calculation' %len(self.perfect_cell.atoms_positions)
-        print defect_compound_name + ': %i atoms loaded from calculation' %len(self.defect_cell.atoms_positions)
+        print('Comparing Geometry of ' + self.defect_cell.treetitle + ' to host cell (' + self.perfect_cell.treetitle + ')...\n')
+        print(perfect_compound_name + ': %i atoms loaded from calculation' %len(self.perfect_cell.atoms_positions))
+        print(defect_compound_name + ': %i atoms loaded from calculation' %len(self.defect_cell.atoms_positions))
         
 #              1) Get focus atoms' fractional coordinates              # 
         f_index = -1
@@ -187,19 +187,19 @@ class GeomComparison:
         message += ' atoms detected in sphere(s) of centre(s) '
         message += ' ' .join([fspecies + '(%i) (%.3f, %.3f, %.3f)'%(fnum, fcoords[0],fcoords[1],fcoords[2]) for fspecies, fnum, fcoords in self.perfect_cell_atom_focus])
         message += ' and radius ' + str(self.r_coord_sphere_cut) + ' A.'
-        print message
-        print str(len(self.defect_cell_coord_sphere)) + ' corresponding atoms detected in defect cell ' + self.defect_cell.treetitle
+        print(message)
+        print(str(len(self.defect_cell_coord_sphere)) + ' corresponding atoms detected in defect cell ' + self.defect_cell.treetitle)
                         
         if(len(self.correspondance_table)<len(self.perfect_cell_coord_sphere)):
             message = 'Warning!The correspondance(s) for '
             message += str(len(self.perfect_cell_coord_sphere)-len(self.correspondance_table))
             message += ' atom correspondance(s) could not be determined!'
-            print message
+            print(message)
         
-        print str(len(self.atom_displacements)) + ' atomic displacements after defect introduction computed.\n'
+        print(str(len(self.atom_displacements)) + ' atomic displacements after defect introduction computed.\n')
 
 #                  4) Measure interatomic distances variations                   # 
-        print 'Measuring interatomic distances variations...'
+        print('Measuring interatomic distances variations...')
 
         self.interatomic_distances_variations = []
         i=0
@@ -234,11 +234,11 @@ class GeomComparison:
                 except TypeError:
                     message  =  atoms_dist[0][0]+str(atoms_dist[0][1])
                     message += ' has no corresponding atom in the defect cell. Skipped.'
-                    print 'Warning! ' + message
+                    print('Warning! ' + message)
                 
-        print '%i atoms investigated, %i significant interatomic distance variations detected.\n' %(i, j)
+        print('%i atoms investigated, %i significant interatomic distance variations detected.\n' %(i, j))
 
-        print 'Comparing Geometry of ' + self.defect_cell.treetitle + ' to host cell (' + self.perfect_cell.treetitle + ')... Done'
+        print('Comparing Geometry of ' + self.defect_cell.treetitle + ' to host cell (' + self.perfect_cell.treetitle + ')... Done')
         
         return self.atom_displacements, self.interatomic_distances_variations
 

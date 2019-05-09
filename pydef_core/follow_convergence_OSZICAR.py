@@ -36,7 +36,7 @@ i = 0
 plt.subplot(311)
 
 for curve in [eList, dEList]:
-	plt.plot(range(len(curve)), curve, label = legend[i], color = colors[i])
+	plt.plot(list(range(len(curve))), curve, label = legend[i], color = colors[i])
 	i += 1
 
 plt.xlabel('Iteration')
@@ -47,7 +47,7 @@ plt.legend()
 plt.subplot(312)
  
 for curve in [dEpsList, rmsList]:
-	plt.plot(range(len(curve)), curve, label = legend[i], color = colors[i])
+	plt.plot(list(range(len(curve))), curve, label = legend[i], color = colors[i])
 	i += 1
 	
 plt.xlabel('Iteration')
@@ -57,7 +57,7 @@ plt.legend()
 plt.subplot(313)
  
 for curve in [eSCF, dESCF]:
-	plt.plot(range(len(curve)), curve, label = legend[i], marker = 'o', linestyle = '--', color = colors[i])
+	plt.plot(list(range(len(curve))), curve, label = legend[i], marker = 'o', linestyle = '--', color = colors[i])
 	i += 1
 	
 plt.xlabel('SCF cycle')

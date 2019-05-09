@@ -1,10 +1,19 @@
+"""
+    Defect study module
+    version: 1.0.0
+    author: Emmanuel Pean
+    e-mail: emmanuel.pean@gmail.com
+    revised: Adrien Stoliaroff
+    e-mail: adrien.stoliaroff@cnrs-imn.fr
+"""
+
 import numpy as np
 import scipy.optimize as sco
 import matplotlib.patches as patches
 
-import basic_functions as bf
-import formation_energy_corrections as zc
-import figure as pf
+from . import basic_functions as bf
+from . import formation_energy_corrections as zc
+from . import figure as pf
 
 
 class DefectCellStudy(object):
@@ -105,7 +114,7 @@ class DefectCellStudy(object):
     
     def set_radius(self, radius):
         self.radius = radius
-        print 'self.radius ' + str(self.radius)
+        print('self.radius ' + str(self.radius))
         if self.pa_correction:
             self.pa, self.pa_corr = self.get_pa_correction()
         else:
@@ -212,7 +221,7 @@ class DefectStudy(object):
         if gaps_input != ['']:
             gaps_labels = [x[1] for x in gaps_input]  # list of gaps label
             gaps = [float(x[0]) for x in gaps_input]  # values of the gaps
-            self.gaps = dict(zip(gaps_labels, gaps))
+            self.gaps = dict(list(zip(gaps_labels, gaps)))
         else:
             self.gaps = {}
         self.gap = self.host_cell.gap - self.de_vbm + self.de_cbm  # corrected gap
@@ -239,7 +248,7 @@ class DefectStudy(object):
                                             self.pa_correction, self.mb_correction, self.phs_correction,
                                             self.vbm_correction, self.mp_correction)
 
-        ds_id = bf.handle_same_string(defect_cell.ID, self.defect_cell_studies.keys())
+        ds_id = bf.handle_same_string(defect_cell.ID, list(self.defect_cell_studies.keys()))
         self.defect_cell_studies[ds_id] = defect_cell_study
         defect_cell_study.ID = ds_id
         
@@ -270,7 +279,7 @@ class DefectStudy(object):
 
         ax, figure = pf.auto_ax(ax)
 
-        e_fermi = np.linspace(self.fpp.xmin, np.max(self.gaps.values() + [self.fpp.xmax]), 10000)
+        e_fermi = np.linspace(self.fpp.xmin, np.max(list(self.gaps.values()) + [self.fpp.xmax]), 10000)
         e_for = [f.get_formation_energy_at_EF(e_fermi) for f in self.dcs]
         e_for_low = np.array([self.get_formation_energy_low_EF(f)[0] for f in e_fermi])
         transition_levels = self.get_transition_levels(e_fermi)
@@ -280,7 +289,7 @@ class DefectStudy(object):
 
         [ax.plot(e_fermi, f, color='black', lw=1.5) for f in e_for]  # formation energies
         ax.plot(e_fermi, e_for_low, color='black', lw=4)  # lowest formation energy
-        [ax.axvline(f[1], label=f[0], lw=2, ls='--') for f in self.gaps.items()]
+        [ax.axvline(f[1], label=f[0], lw=2, ls='--') for f in list(self.gaps.items())]
         
         if self.fpp.display_charges:
             [charges_annotation(e_fermi, f, g, ax) for f, g in zip(e_for, charges)]
@@ -297,7 +306,7 @@ class DefectStudy(object):
 
         pf.set_ax_parameters(ax, title=self.fpp.title, xlabel=self.fpp.x_label, ylabel=self.fpp.y_label, xlim=[self.fpp.xmin, self.fpp.xmax], ylim=[self.fpp.ymin, self.fpp.ymax], legend=self.fpp.display_legends, grid=self.fpp.grid,
                              fontsize=self.fpp.fontsize, l_fontsize=self.fpp.l_fontsize, xticks=self.fpp.xticks_var, xtick_labels=self.fpp.xticklabels_var, yticks=self.fpp.yticks_var,
-                             ytick_label=self.fpp.yticklabels_var, title_fontsize=self.fpp.title_fontsize, tight=tight)
+                             ytick_labels=self.fpp.yticklabels_var, title_fontsize=self.fpp.title_fontsize, tight=tight)
         return figure
 
     def plot_transition_levels(self, ax=None, tpp=None, tight=True):
@@ -397,7 +406,7 @@ class DefectStudy(object):
 
         f.close()
         
-        print 'Material Study ' + self.treetitle + '\'s data exported successfully!'
+        print('Material Study ' + self.treetitle + '\'s data exported successfully!')
 
 
 class MaterialStudy(object):
@@ -429,13 +438,13 @@ class MaterialStudy(object):
 
     @property
     def ds_list(self):
-        temp = [[def_stud, def_stud.treetitle] for def_stud in self.defect_studies.values()]
+        temp = [[def_stud, def_stud.treetitle] for def_stud in list(self.defect_studies.values())]
         temp.sort(key=lambda x: x[1])
         return [def_stud for def_stud, title in temp]
 
     def add_defect_study(self, defect_study):
 
-        object_id = bf.handle_same_string(defect_study.ID, self.defect_studies.keys())
+        object_id = bf.handle_same_string(defect_study.ID, list(self.defect_studies.keys()))
         self.defect_studies[object_id] = defect_study
 
     def plot_formation_energy(self, ax=None, fpp=None, tight=True):
@@ -445,7 +454,7 @@ class MaterialStudy(object):
             fpp = FormationPlotParameters(self)
         ax, figure = pf.auto_ax(ax)
 
-        e_fermi = np.linspace(fpp.xmin, np.max(self.gaps.values() + [fpp.xmax]), 10000)
+        e_fermi = np.linspace(fpp.xmin, np.max(list(self.gaps.values()) + [fpp.xmax]), 10000)
 
         # -------------------------------------------------- PLOT ------------------------------------------------------
 
@@ -479,13 +488,13 @@ class MaterialStudy(object):
         # Gaps
         gaps_colors = ('b', 'g', 'r', 'm', 'p')
         if fpp.display_gaps_legend:
-            gaps_lines = [ax.axvline(f[1], label=f[0], lw=2, ls='--', color=g) for f, g in zip(self.gaps.items(), gaps_colors)]
+            gaps_lines = [ax.axvline(f[1], label=f[0], lw=2, ls='--', color=g) for f, g in zip(list(self.gaps.items()), gaps_colors)]
         else:
-            gaps_lines = [ax.axvline(f[1], lw=2, ls='--', color=g) for f, g in zip(self.gaps.items(), gaps_colors)]
+            gaps_lines = [ax.axvline(f[1], lw=2, ls='--', color=g) for f, g in zip(list(self.gaps.items()), gaps_colors)]
 
         pf.set_ax_parameters(ax, title=fpp.title, xlabel=fpp.x_label, ylabel=fpp.y_label, xlim=[fpp.xmin, fpp.xmax], ylim=[fpp.ymin, fpp.ymax], legend=fpp.display_legends, grid=fpp.grid,
                              fontsize=fpp.fontsize, l_fontsize=fpp.l_fontsize, xticks=fpp.xticks_var, xtick_labels=fpp.xticklabels_var, yticks=fpp.yticks_var,
-                             ytick_label=fpp.yticklabels_var, title_fontsize=fpp.title_fontsize, tight=tight)
+                             ytick_labels=fpp.yticklabels_var, title_fontsize=fpp.title_fontsize, tight=tight)
         self.lastfpp = fpp
         ax.plot([fpp.xmin, fpp.xmax],[0,0], '--', lw=3,color='black')
 
@@ -589,8 +598,8 @@ class ConcentrationsCalculation(object):
         self.labels = ['n_h', 'n_e', 'E_{Fermi} (growth)', 'E_{Fermi} (room)'] + defect_labels
         self.units =  ['cm^{-3}', 'cm^{-3}', 'eV', 'eV'] + len(defect_ids) * ['cm^{-3}']
 
-        self.labels_dict = dict(zip(self.data_id, self.labels))
-        self.units_dict = dict(zip(self.data_id, self.labels))
+        self.labels_dict = dict(list(zip(self.data_id, self.labels)))
+        self.units_dict = dict(list(zip(self.data_id, self.labels)))
 
         # Theoretical DOS method
         if self.m_e is not None and self.m_h is not None :
@@ -685,7 +694,7 @@ class ConcentrationsCalculation(object):
         """ Compute the defect concentration at growth temperature """
 
         try:
-            e_f_growth = sco.brentq(lambda e: self.get_neutrality(e, t_growth), 0., self.gap)
+            e_f_growth = sco.brentq(lambda e: self.get_neutrality(e, t_growth), 0., 1.5*self.gap)
         except ValueError:
             error_message = 'Unable to find a root while solving neutrality of charge equation at growth temperature! '
             error_message += 'Consider specifying effective masses of carriers.'
@@ -697,7 +706,7 @@ class ConcentrationsCalculation(object):
 
         # At room temperature
         try:
-            e_f_room = sco.brentq(lambda e: self.get_neutrality(e, t_room, qn_defects), 0., self.gap)
+            e_f_room = sco.brentq(lambda e: self.get_neutrality(e, t_room, qn_defects), 0., 1.5*self.gap)
         except ValueError:
             error_message = 'Unable to find a root while solving neutrality of charge equation at room temperature! '
             error_message += 'Consider specifying effective masses of carriers.'
@@ -720,29 +729,26 @@ class ConcentrationsCalculation(object):
             temperatures = np.arange(t_room[0], t_room[1] + t_room[2], t_room[2])
             temp = [self.get_concentrations(t_growth, t) for t in temperatures]
 
-        data = map(list, zip(*temp))
+        data = list(map(list, list(zip(*temp))))
 
         n_defects = np.transpose(data[2])
         del data[2]
         data = np.array(data[:-1])
         data = np.append(data, n_defects, axis=0)
-        data_dict = dict(zip(self.data_id, data))
+        data_dict = dict(list(zip(self.data_id, data)))
 
         return temperatures, data_dict
         
     def plot(self, pp=None, ax=None, tight=True):
-        
-        if ax is None:
-            ax, figure = pf.auto_ax()
-            
+        ax, figure = pf.auto_ax()
         if pp is not None:
-        
-            print 'Computing concentrations... This may take some time... Please wait...'
+            print('Computing concentrations... This may take some time... Please wait...')
             if pp.growth:
+                print('Specified temperature is the room temperature, variable: T growth')
                 temperatures, data_dict = self.get_concentrations_temperature((pp.xmin, pp.xmax, pp.dt), pp.temperature)
             else:
+                print('Specified temperature is the growth temperature, variable: T room')
                 temperatures, data_dict = self.get_concentrations_temperature(pp.temperature, (pp.xmin, pp.xmax, pp.dt))
-
             for i in pp.data_id:
                 y = data_dict[i]
                 if type(pp) == CarrierConcentrationPlotParameters or type(pp) == ConcentrationPlotParameters:
@@ -760,7 +766,6 @@ class ConcentrationsCalculation(object):
                         )
                     ax.add_patch(cband)
                     ax.text(pp.xmin + 0.5*(pp.xmax-pp.xmin), self.gap + (pp.ymax - self.gap)*0.5 , 'CB', fontsize=pp.fontsize)
-
                     vband = patches.Rectangle(
                             (pp.xmin, -1),   # (x,y)
                             pp.xmax - pp.xmin,    # width
@@ -772,7 +777,6 @@ class ConcentrationsCalculation(object):
                         )
                     ax.add_patch(vband)
                     ax.text(pp.xmin + 0.5*(pp.xmax-pp.xmin), pp.ymin*0.5 , 'VB', fontsize=pp.fontsize)
-
                     ax.plot([pp.xmin, pp.xmax], [0.5*self.gap, 0.5*self.gap], '--', color = 'black', label = 'Middle \nof the band gap')
                     ax.plot([pp.xmin, pp.xmax], [0,0], '--', color = 'red', label = 'VBM', lw=4)
                     ax.plot([pp.xmin, pp.xmax], [self.gap, self.gap], '--', color = 'blue', label = 'CBM', lw=4)
@@ -781,18 +785,16 @@ class ConcentrationsCalculation(object):
                     ax.plot(temperatures, y, lw=3, label=label, color='black')
                 else:
                     ax.plot(temperatures, y, lw=3, label=label, color=pp.colors[i])
-            
             if type(pp) == ConcentrationPlotParameters and pp.fill_type:
                 ne = data_dict['n (electrons)']
                 nh = data_dict['n (holes)']
                 ax.fill_between(temperatures, ne, nh, where= ne >= nh, facecolor=pp.colors['n type'], alpha=0.5, interpolate=True, label=r'$n_e > n_h$ ($n$ type)')
                 ax.fill_between(temperatures, ne, nh, where= ne <= nh, facecolor=pp.colors['p type'], alpha=0.5, interpolate=True, label=r'$n_e < n_h$ ($p$ type)')
-            
             pf.set_ax_parameters(ax, title=pp.title, xlabel=pp.x_label, ylabel=pp.y_label, xlim=[pp.xmin, pp.xmax], ylim=[pp.ymin, pp.ymax], legend=pp.display_legends, grid=pp.grid,
                                  fontsize=pp.fontsize, l_fontsize=pp.l_fontsize, xticks=pp.xticks_var, xtick_labels=pp.xticklabels_var, yticks=pp.yticks_var,
-                                 ytick_label=pp.yticklabels_var, title_fontsize=pp.title_fontsize, ylog=pp.ylog, tight=False)
-                   
-            return figure
+                                 ytick_labels=pp.yticklabels_var, title_fontsize=pp.title_fontsize, ylog=pp.ylog, tight=False)
+            
+            return figure, temperatures, data_dict
 
 
 class FormationPlotParameters(pf.PlotParameters):
@@ -818,11 +820,11 @@ class FormationPlotParameters(pf.PlotParameters):
         elif type(study) == MaterialStudy:
             # MATERIAL STUDIES
             self.highlight_charge_change = True  # if True, highlight charge change
-            self.colors = dict(zip([defstud.ID for defstud in study.ds_list], ['red', 'yellowgreen', 'blue', 'orange', 'black', 'brown', 'darkgreen', 'navy', 'gold',
-                                 'm', 'teal', 'darkmagenta']))
+            self.colors = dict(list(zip([defstud.ID for defstud in study.ds_list], ['red', 'yellowgreen', 'blue', 'orange', 'black', 'brown', 'darkgreen', 'navy', 'gold',
+                                 'm', 'teal', 'darkmagenta'])))
             self.display_gaps_legend = True
-            self.ymin = 1.05*min([stud.fpp.ymin for stud in study.defect_studies.values()])
-            self.ymax = 1.05*max([stud.fpp.ymax for stud in study.defect_studies.values()])
+            self.ymin = 1.05*min([stud.fpp.ymin for stud in list(study.defect_studies.values())])
+            self.ymax = 1.05*max([stud.fpp.ymax for stud in list(study.defect_studies.values())])
             self.title = 'Defect formation energies'
             self.name = 'Default Defect Formation Energies Plot Parameters'
         self.for_range = ['auto', 'auto']  # formation energy range displayed

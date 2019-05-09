@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
-import Tkinter as tk
-from Tkinter import Tk, Frame, Menu, Button, Label, Canvas, Scrollbar
-from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, SUNKEN, ALL, VERTICAL, W
+import tkinter as tk
+from tkinter import Tk, Frame, Menu, Button, Label, Canvas, Scrollbar
+from tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, SUNKEN, ALL, VERTICAL, W
 from PIL import Image, ImageTk
 
-import ttk
+import tkinter.ttk
 
 import tkinter_utilities as tu
 import pydef_core.defect_study as ds
@@ -39,7 +39,7 @@ class MultipleSubplotFigure(object):
     
     def plot(self):
         self.figure = plt.figure()
-        for n in self.grid.keys():
+        for n in list(self.grid.keys()):
             # try:
             # self.axes[n] = figure.add_subplot(self.nrow, self.ncol, n + 1)
             # self.grid[n]['plot_func'](self.axes[n])
@@ -138,7 +138,7 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
     
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        self.buttons_frame = ttk.Frame(self.main_frame)
+        self.buttons_frame = tkinter.ttk.Frame(self.main_frame)
 
         tk.Button(self.buttons_frame, text='Apply', command=self.save).grid(row=0, column=0, padx=5)
         tk.Button(self.buttons_frame, text='OK', command=lambda: self.save(close=True)).grid(row=0, column=1, padx=5)
@@ -164,7 +164,7 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
         project.mfigures[self.figure.name] = self.figure
         # plot
         self.mainwindow.plot_mfigure(self.figure)
-        print 'Multiple Subplot Figure ' + self.figure.name + ' successfully saved in Project ' + project.name
+        print('Multiple Subplot Figure ' + self.figure.name + ' successfully saved in Project ' + project.name)
         if close:
             self.destroy()
         
@@ -183,19 +183,19 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
                 self.elements[i]['b'] = tk.Button(frame, bg='white', image=self.white_bg_icon)
                 self.elements[i]['b'].grid(row=0, column=0, sticky='nsew', columnspan=2)
                 tk.Label(frame, text='Object Type').grid(row=1, column=0, sticky='nsew')            
-                self.elements[i]['otype'] = ttk.Combobox(frame, values=object_types(), state="readonly")
+                self.elements[i]['otype'] = tkinter.ttk.Combobox(frame, values=object_types(), state="readonly")
                 self.elements[i]['otype'].grid(row=1, column=1, sticky='nsew')
                 tk.Label(frame, text='Object').grid(row=2, column=0, sticky='nsew') 
-                self.elements[i]['obj'] = ttk.Combobox(frame, state="readonly")
+                self.elements[i]['obj'] = tkinter.ttk.Combobox(frame, state="readonly")
                 self.elements[i]['obj'].grid(row=2, column=1, sticky='nsew')
                 tk.Label(frame, text='Plot Type').grid(row=3, column=0, sticky='nsew') 
-                self.elements[i]['ptype'] = ttk.Combobox(frame, state="readonly")
+                self.elements[i]['ptype'] = tkinter.ttk.Combobox(frame, state="readonly")
                 self.elements[i]['ptype'].grid(row=3, column=1, sticky='nsew')
                 tk.Label(frame, text='Plot Parameters').grid(row=4, column=0, sticky='nsew')
-                self.elements[i]['pp'] = ttk.Combobox(frame, state="readonly")
+                self.elements[i]['pp'] = tkinter.ttk.Combobox(frame, state="readonly")
                 self.elements[i]['pp'].grid(row=4, column=1, sticky='nsew')
                 row, col = fig_num_to_grid(i, self.nrow, self.ncol)
-                frame.grid(row=row, column=col, sticky='nsew')
+                frame.grid(row=int(row), column=int(col), sticky='nsew')
                 self.elements[i]['otype'].bind("<<ComboboxSelected>>", lambda event, n=i: self.on_select_obj_type(event, n))
                 self.elements[i]['obj'].bind("<<ComboboxSelected>>", lambda event, n=i: self.on_select_obj(event, n))
                 self.elements[i]['ptype'].bind("<<ComboboxSelected>>", lambda event, n=i: self.on_select_plot_type(event, n))
@@ -204,7 +204,7 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
             self.grid_frame.grid(sticky='nsew')
             self.buttons_frame.grid(pady=3, sticky='nse')
         else:
-            print 'Warning! Please specify figure name'
+            print('Warning! Please specify figure name')
     
     def on_select_obj_type(self, event, n):
         # affect values list for nth Object Combobox
@@ -212,7 +212,7 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
         selected_otype = self.elements[n]['otype'].get()
         project = self.mainwindow.projects[self.mainwindow.currentprojectid]
         if selected_otype == 'Cell':
-            select_list = [cell.treetitle for cell in project.cells.values()]
+            select_list = [cell.treetitle for cell in list(project.cells.values())]
             select_list.sort()
             self.elements[n]['obj'].configure(values=select_list)
             self.elements[n]['ptype'].configure(values=['Density of States', 'Band diagram', 'Optical Indices'])
@@ -222,14 +222,14 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
                 self.elements[n]['ptype'].set('Stability Domain')
                 self.add_element_to_figure({'object': project.chemical_potentials, 'pp': project.chemical_potentials.lastppp, 'selected_ptype': 'Stability Domain'}, n)
                 self.update_icon('Stability Domain', n)
-                self.elements[n]['pp'].configure(values=[cpp for cpp in project.pp['cpp'].values()])
+                self.elements[n]['pp'].configure(values=[cpp for cpp in list(project.pp['cpp'].values())])
             else:
-                print 'Warning! There is no Chemical Potentials in Project ' + str(project.name)
+                print('Warning! There is no Chemical Potentials in Project ' + str(project.name))
         elif selected_otype == 'Defect Study':
-            self.elements[n]['obj'].configure(values=[def_stud.treetitle for def_stud in project.defect_studies.values()])
+            self.elements[n]['obj'].configure(values=[def_stud.treetitle for def_stud in list(project.defect_studies.values())])
             self.elements[n]['ptype'].configure(values=['Defect Formation Energies', 'Transition Levels'])
         elif selected_otype == 'Material Study':
-            self.elements[n]['obj'].configure(values=[mat_stud.treetitle for mat_stud in project.material_studies.values()])
+            self.elements[n]['obj'].configure(values=[mat_stud.treetitle for mat_stud in list(project.material_studies.values())])
             self.elements[n]['ptype'].configure(values=['Defect Formation Energies', 
             'Transition Levels', 'Defects Concentrations', 'Charge Carriers Concentrations', 
             'Fermi Level Variations vs. Temperature'])
@@ -239,14 +239,14 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
         treetitle = self.elements[n]['obj'].get()
         selected_otype = self.elements[n]['otype'].get()
         if selected_otype == 'Cell':
-            self.add_element_to_figure({'object': [cell for cell in project.cells.values() if cell.treetitle==treetitle][0]}, n)
+            self.add_element_to_figure({'object': [cell for cell in list(project.cells.values()) if cell.treetitle==treetitle][0]}, n)
         elif selected_otype == 'Defect Study':
-            findlist = [def_stud for def_stud in project.defect_studies.values() if def_stud.treetitle==treetitle]
+            findlist = [def_stud for def_stud in list(project.defect_studies.values()) if def_stud.treetitle==treetitle]
             if len(findlist)==0:
                 findlist = [def_stud for def_stud in project.material_studies[mat_stud_key] for mat_stud_key in project.material_studies if def_stud.treetitle==treetitle]
             self.add_element_to_figure({'object': findlist[0]}, n)
         elif selected_otype == 'Material Study':
-            self.add_element_to_figure({'object': [mat_stud for mat_stud in project.material_studies.values() if mat_stud.treetitle==treetitle][0]}, n)
+            self.add_element_to_figure({'object': [mat_stud for mat_stud in list(project.material_studies.values()) if mat_stud.treetitle==treetitle][0]}, n)
     
     def on_select_plot_type(self, event, n):
         # affect values list for nth Plot Parameters Combobox
@@ -255,22 +255,22 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
         project = self.mainwindow.projects[self.mainwindow.currentprojectid]
         self.add_element_to_figure({'selected_ptype': selected_ptype}, n)
         if selected_ptype == 'Density of States':
-            self.elements[n]['pp'].configure(values=[dpp.name for dpp in project.pp['dpp'].values()])
+            self.elements[n]['pp'].configure(values=[dpp.name for dpp in list(project.pp['dpp'].values())])
         elif selected_ptype == 'Band diagram':
-            self.elements[n]['pp'].configure(values=[bpp.name for bpp in project.pp['bpp'].values()])
+            self.elements[n]['pp'].configure(values=[bpp.name for bpp in list(project.pp['bpp'].values())])
         elif selected_ptype == 'Optical Indices':
-            self.elements[n]['pp'].configure(values=[opp.name for opp in project.pp['opp'].values()])
+            self.elements[n]['pp'].configure(values=[opp.name for opp in list(project.pp['opp'].values())])
             self.figure.grid[n]['object'] = self.figure.grid[n]['object'].optical_indices
         elif selected_ptype == 'Defect Formation Energies':
             if type(self.figure.grid[n]['object'])==ds.DefectStudy:
                 self.elements[n]['pp'].set(self.figure.grid[n]['object'].treetitle + ' Defect Formation Energies Plot Parameters')
             else:
-                self.elements[n]['pp'].configure(values=[fpp.name for fpp in project.pp['fpp'].values()])
+                self.elements[n]['pp'].configure(values=[fpp.name for fpp in list(project.pp['fpp'].values())])
         elif selected_ptype == 'Transition Levels':
             if type(self.figure.grid[n]['object'])==ds.DefectStudy:
                 self.elements[n]['pp'].set(self.figure.grid[n]['object'].treetitle + ' Transition Levels Plot Parameters')
             else:
-                self.elements[n]['pp'].configure(values=[tpp for tpp in project.pp['tpp'].values()])
+                self.elements[n]['pp'].configure(values=[tpp for tpp in list(project.pp['tpp'].values())])
         self.update_icon(selected_ptype, n)
     
     def on_select_pp(self, event, n):
@@ -280,15 +280,15 @@ class MultipleSubplotFigureCreationWindow(tk.Toplevel):
         selected_ptype = self.elements[n]['ptype'].get()
         if self.elements[n]['otype'].get() == 'Defect Study':
             if self.elements[n]['ptype'] == 'Defect Formation Energies':
-                selected_pp = [fpp for fpp in project.pp['fpp'].values() if fpp.name==selected_pp_name][0]
+                selected_pp = [fpp for fpp in list(project.pp['fpp'].values()) if fpp.name==selected_pp_name][0]
             elif self.elements[n]['ptype'] == 'Transition Levels':
-                selected_pp = [bpp for bpp in project.pp['bpp'].values() if bpp.name==selected_pp_name][0]
+                selected_pp = [bpp for bpp in list(project.pp['bpp'].values()) if bpp.name==selected_pp_name][0]
         elif selected_ptype == 'Density of States':
-            selected_pp = [dpp for dpp in project.pp['dpp'].values() if dpp.name==selected_pp_name][0]
+            selected_pp = [dpp for dpp in list(project.pp['dpp'].values()) if dpp.name==selected_pp_name][0]
         elif selected_ptype == 'Band diagram':
-            selected_pp = [bpp for bpp in project.pp['bpp'].values() if bpp.name==selected_pp_name][0]
+            selected_pp = [bpp for bpp in list(project.pp['bpp'].values()) if bpp.name==selected_pp_name][0]
         elif selected_ptype == 'Optical Indices':
-            selected_pp = [opp for opp in project.pp['opp'].values() if opp.name==selected_pp_name][0]
+            selected_pp = [opp for opp in list(project.pp['opp'].values()) if opp.name==selected_pp_name][0]
         self.add_element_to_figure({'selected_pp': selected_pp}, n)
     
     def update_icon(self, ptype, n):

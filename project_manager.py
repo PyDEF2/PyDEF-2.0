@@ -6,11 +6,11 @@
 """
 
 # GUI imports
-import Tkinter as tk
-from Tkinter import Tk, Frame, Menu, Button, Label
-from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END
-import ttk
-import tkMessageBox as mb
+import tkinter as tk
+from tkinter import Tk, Frame, Menu, Button, Label
+from tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END
+import tkinter.ttk
+import tkinter.messagebox as mb
 
 import sys
 
@@ -27,11 +27,10 @@ import pydef_core.defect_geom_comparison as gc
 class ProjectsManager(object):
     """Project management tree: the tree displayed on the main window corresponding to the main window dictionary of Projects"""
 
-    def __init__(self, parent, mainwindow):
+    def __init__(self, parent, mainwindow): #Add command to make New Project button functionnal
 
         self.parent = parent
         self.mainwindow = mainwindow
-
         def rename():
             # To be able to rename tree elements
             # memory
@@ -66,7 +65,7 @@ class ProjectsManager(object):
                             self.mainwindow.projects[pid].material_studies[containerID].defect_studies[cid].treetitle = name
                     elif otype == 'material-study':
                         self.mainwindow.projects[pid].material_studies[cid].treetitle = name
-                    print 'Renamed ' + initialname.replace(' (host)','') + ' to ' + name
+                    print('Renamed ' + initialname.replace(' (host)','') + ' to ' + name)
                     if parent.isHost:
                         treepointer.item(selectionpointer, text = name + ' (host)')
                 elif event.keysym_num == 65288: # Delete
@@ -105,7 +104,7 @@ class ProjectsManager(object):
             try:
                 self.mainwindow.currentitemid = self.tree.item(self.tree.identify_row(event.y))['values'][1] #in case of double-click
                 self.mainwindow.currentprojectid = self.tree.item(self.tree.identify_row(event.y))['values'][0] #in case of double-click
-            except AttributeError, e:
+            except AttributeError as e:
                 # selected from button or contextual menu
                 pass
             self.mainwindow.plot()
@@ -114,7 +113,7 @@ class ProjectsManager(object):
             try:
                 self.mainwindow.currentitemid = self.tree.item(self.tree.identify_row(event.y))['values'][1] #in case of double-click
                 self.mainwindow.currentprojectid = self.tree.item(self.tree.identify_row(event.y))['values'][0] #in case of double-click
-            except AttributeError, e:
+            except AttributeError as e:
                 # selected from button or contextual menu
                 pass
             self.mainwindow.plot_optical_indices()    
@@ -146,8 +145,8 @@ class ProjectsManager(object):
             try:
                 dpp = cell.lastdpp
                 cw.DosPlotParametersWindow(self.mainwindow, cell, dpp)
-            except AttributeError, e:
-                print 'Warning! ' + cell.treetitle + ' has no DOSCAR! Please import a DOSCAR to plot DoS'
+            except AttributeError as e:
+                print('Warning! ' + cell.treetitle + ' has no DOSCAR! Please import a DOSCAR to plot DoS')
                 # self.mainwindow.printerror(str(e))
 
         def show_bpp_window():
@@ -166,7 +165,7 @@ class ProjectsManager(object):
             if is_embedded: # necessarily embedded
                 if project.object_str_type(dsid) == 'material-study':
                     mat_stud = project.material_studies[dsid]
-                    def_stud1 = [def_stud for def_stud in mat_stud.defect_studies.values() for dc_stud in def_stud.defect_cell_studies.values() if dc_stud.defect_cell == cell][0]
+                    def_stud1 = [def_stud for def_stud in list(mat_stud.defect_studies.values()) for dc_stud in list(def_stud.defect_cell_studies.values()) if dc_stud.defect_cell == cell][0]
                     defects = def_stud1.defects
                 else:
                     defects = project.defect_studies[dsid].defects  
@@ -208,21 +207,21 @@ class ProjectsManager(object):
             def print_m():
                 message = 'Warning! There is no dielectric function to plot in this file! '
                 message += '\nSee https://cms.mpi.univie.ac.at/wiki/index.php/Dielectric_properties_of_SiC for VASP help'
-                print message
+                print(message)
                 return None
             try:
                 cell = project.cells[self.mainwindow.currentitemid]
                 len(cell.optical_indices.components)
-            except TypeError,e :
+            except TypeError as e :
                 if bf.grep(cell.outcar, "DIELECTRIC FUNCTION") is not None or bf.grep(cell.outcar, "DIELECTRIC TENSOR") is not None:
                     cell.optical_indices = oi.OpticalIndices(cell.outcar)
                 else:
                     print_m()
-            except AttributeError,e:
+            except AttributeError as e:
                 print_m()
             opp = project.cells[self.mainwindow.currentitemid].optical_indices.lastopp
             if opp not in project.pp['opp']:
-				project.pp['opp'].update({opp.name: opp})
+              project.pp['opp'].update({opp.name: opp})
             cw.OpticalIndicesPlotParametersWindow(self.mainwindow, project, opp)
         
         def show_cpp_window():
@@ -238,9 +237,9 @@ class ProjectsManager(object):
             msw.FermiLevelVariationsPlotParametersWindow(self.mainwindow, material_study)
 
         def show_ms_summary_window():
-			project = self.mainwindow.projects[self.mainwindow.currentprojectid]
-			ms = project.material_studies[self.mainwindow.currentitemid]
-			msw.SummaryWindow(self.mainwindow, ms)
+          project = self.mainwindow.projects[self.mainwindow.currentprojectid]
+          ms = project.material_studies[self.mainwindow.currentitemid]
+          msw.SummaryWindow(self.mainwindow, ms)
         
         def select(event):
             self.selection = selection = self.tree.identify_row(event.y)
@@ -273,12 +272,14 @@ class ProjectsManager(object):
 
         def do_popup(event):
             """display the popup menu"""
+            select(event)
             self.popup.delete(0, self.popup.items + 2) 
             self.popup.selection = self.tree.identify_row(event.y)
             # change self.mainwindow.currentprojectid to selected project ID
             self.mainwindow.currentprojectid = self.tree.item(self.popup.selection)['values'][0]
             self.mainwindow.currentitemid = self.tree.item(self.popup.selection)['values'][1]
 
+            # print 'Tree entry ID: ' + self.tree.item(self.popup.selection)['values'][1]
             if self.mainwindow.projects[self.mainwindow.currentprojectid].object_str_type(self.tree.item(self.popup.selection)['values'][1]) == 'cell':
                 self.popup.add_command(label="Rename", command=rename)
                 self.popup.add_command(label="Delete", command=self.delete)
@@ -345,23 +346,28 @@ class ProjectsManager(object):
                 self.popup.unpost()
                 self.popup.delete(0, self.popup.items)
             self.popup.bind("<Leave>", popupFocusOut)
-
+            
+        
         # Prepare tree
-        self.tree = ttk.Treeview(parent)
-        self.tree.heading("#0", text = "Project Manager")
+        self.tree = tkinter.ttk.Treeview(parent)
+        self.tree.heading("#0", text = "New Project")
         self.mem = {}
-        sortlist = [(proj.pid, proj) for proj in mainwindow.projects.values()]
+        sortlist = [(proj.pid, proj) for proj in list(mainwindow.projects.values())]
         sortlist.sort(key=lambda x: x[0])
         for name, project in sortlist:
             self.mainwindow.currentprojectid = project.pid
             self.new_project(project)
         self.tree.bind("<Button-1>", select)
+        self.tree.bind("<Button-3>", select)
         self.tree.bind("<Button-3>", do_popup)
         if sys.platform == 'darwin':
             # on MacOSX, right-click button is button 2
             # https://stackoverflow.com/questions/30668425/tkinter-right-click-popup-unresponsive-on-osx
+            self.tree.bind("<Button-2>", select)
             self.tree.bind("<Button-2>", do_popup)
         self.tree.bind("<Double-Button-1>", plot)
+        
+    
     
     def delete(self):
             # if not embedded, remove
@@ -381,6 +387,7 @@ class ProjectsManager(object):
                     return None
             if len(otype)<1:
                 otype = mainwindow.projects[pid].object_str_type(cid)
+            # print 'otype: ' + otype
 
             if otype == 'cell':
                 res, containerID, removeID = mainwindow.projects[pid].is_embedded(cid)
@@ -405,7 +412,7 @@ class ProjectsManager(object):
                         cell = mainwindow.projects[pid].defect_studies[containerID].defect_cell_studies.pop(removeID).defect_cell
                     self.tree.insert(self.mem[pid]['cells_header'], self.mem[pid]['ncalc'], text = cell.treetitle, values = [pid, cell.ID])
             elif otype == 'chem-pot':
-                nonsyn = self.mainwindow.projects[pid].chemical_potentials.non_synthesized.values()
+                nonsyn = list(self.mainwindow.projects[pid].chemical_potentials.non_synthesized.values())
                 for cell in nonsyn:
                     self.mainwindow.projects[pid].add_cell(cell)
                 self.remove_chemical_potentials(pid)
@@ -414,13 +421,13 @@ class ProjectsManager(object):
                 if is_embedded:
                     self.mainwindow.pm.remove_defect_study_from_material_study(self.mainwindow.projects[pid].material_studies[containerID].defect_studies[self.mainwindow.currentitemid], self.mainwindow.projects[pid].material_studies[containerID], pid)
                 else:
-                    sort_charge_list = [[dcstud, dcstud.defect_cell.charge] for dcstud in self.mainwindow.projects[pid].defect_studies[cid].defect_cell_studies.values()]
+                    sort_charge_list = [[dcstud, dcstud.defect_cell.charge] for dcstud in list(self.mainwindow.projects[pid].defect_studies[cid].defect_cell_studies.values())]
                     sort_charge_list.sort(key=lambda x: x[1])
                     for dcstud, q in sort_charge_list:
                         self.mainwindow.projects[pid].add_cell(dcstud.defect_cell)
                     self.mainwindow.projects[pid].defect_studies.pop(cid)
             elif otype == 'material-study':
-                sortmslist = [[dstud.treetitle, dstud] for dstud in self.mainwindow.projects[pid].material_studies[cid].defect_studies.values()]
+                sortmslist = [[dstud.treetitle, dstud] for dstud in list(self.mainwindow.projects[pid].material_studies[cid].defect_studies.values())]
                 sortmslist.sort(key=lambda x: x[0])
                 for treetitle, defstud in sortmslist:
                     self.mainwindow.projects[pid].add_defect_study(defstud)
@@ -432,13 +439,13 @@ class ProjectsManager(object):
                 pass
             try:
                 project = self.mainwindow.projects[pid]
-                if (len(project.defect_studies.keys()) == 0) and ('defect_studies_header' in self.mem[pid]):
+                if (len(list(project.defect_studies.keys())) == 0) and ('defect_studies_header' in self.mem[pid]):
                     try:
                         self.tree.delete(self.mem[pid]['defect_studies_header'])
                     except TclError:
                         pass
                     self.mem[pid].pop('defect_studies_header')
-                if (len(project.material_studies.keys()) == 0) and ('material_studies_header' in self.mem[pid]):
+                if (len(list(project.material_studies.keys())) == 0) and ('material_studies_header' in self.mem[pid]):
                     self.tree.delete(self.mem[pid]['material_studies_header'])
                     self.mem[pid].pop('material_studies_header')
             except KeyError:
@@ -460,13 +467,13 @@ class ProjectsManager(object):
             values=[projid, project.chemical_potentials.ID])
             self.mem[projid]['chem_pot_header'] = chem_pot_entry
             self.mem[projid]['chem_pot_n_ns'] = 0
-            cells_list = [[cell, cell.treetitle] for cell in project.chemical_potentials.non_synthesized.values()]
+            cells_list = [[cell, cell.treetitle] for cell in list(project.chemical_potentials.non_synthesized.values())]
             cells_list.sort(key=lambda x: x[1])
             for cell, title in cells_list:
                 self.add_phase_in_chemical_potentials(cell, projid)
             self.mainwindow.currentitemid = project.chemical_potentials.ID
         except KeyError:
-            print 'KeyError while trying to create chemical potentials in ' + project.name + '(' + project.pid + ')'
+            print('KeyError while trying to create chemical potentials in ' + project.name + '(' + project.pid + ')')
         
     def add_phase_in_chemical_potentials(self, cell, projid):
         self.delete_tree_entry(projid, cell.ID, header=self.mem[projid]['cells_header'])
@@ -486,16 +493,16 @@ class ProjectsManager(object):
         self.mem[projid].pop('chem_pot_n_ns')
     
     def new_defect_study(self, newdefstudy, projid):
-        if not 'defect_studies_header' in self.mem[projid].keys():
+        if not 'defect_studies_header' in list(self.mem[projid].keys()):
             defect_studies_header = self.tree.insert(self.mem[projid]['proj'], 1, text = 'Defect studies', values = [projid, 'title-entry-ds'])
             self.mem[projid].update({'defect_studies_header':defect_studies_header, 'n_defstudy':0})
         def_study_dict = {}
         def_study_dict[newdefstudy.ID] = self.tree.insert(self.mem[projid]['defect_studies_header'], self.mem[projid]['n_defstudy'], text = newdefstudy.treetitle, values = [projid, newdefstudy.ID])
-        sort_charge_list = [[dcstud, dcstud.defect_cell.charge] for dcstud in newdefstudy.defect_cell_studies.values()]
+        sort_charge_list = [[dcstud, dcstud.defect_cell.charge] for dcstud in list(newdefstudy.defect_cell_studies.values())]
         sort_charge_list.sort(key=lambda x: x[1])
         
         def_study_dict['n_dcs'] = 0
-        if 'def_study_dict' not in self.mem[projid].keys():
+        if 'def_study_dict' not in list(self.mem[projid].keys()):
             self.mem[projid]['def_study_dict'] = def_study_dict
         else:
             self.mem[projid]['def_study_dict'].update(def_study_dict)
@@ -530,20 +537,20 @@ class ProjectsManager(object):
     
     def new_material_study(self, newms, projid):
         project = self.mainwindow.projects[projid]
-        if not 'material_studies_header' in self.mem[projid].keys():
+        if not 'material_studies_header' in list(self.mem[projid].keys()):
             material_studies_header = self.tree.insert(self.mem[projid]['proj'], 2, text = 'Material studies', values = [project.pid, 'title-entry-ms'])
             self.mem[projid].update({'material_studies_header':material_studies_header, 'n_matstudy':0})
-        if newms.ID not in project.material_studies.keys():
+        if newms.ID not in list(project.material_studies.keys()):
             project.add_material_study(newms)
         matstudentry = self.tree.insert(self.mem[projid]['material_studies_header'], self.mem[projid]['n_matstudy'], text = newms.treetitle, values = [projid, newms.ID])
         # add Defect Studies under Material study entry
         i = 0
         for defstudy in newms.ds_list:
             def_study_entry = self.tree.insert(matstudentry, i, text=defstudy.treetitle, values=[projid, defstudy.ID])
-            sort_charge_list = [[dcstudy.defect_cell.ID, dcstudy.defect_cell.charge] for dcstudy in defstudy.defect_cell_studies.values()]
+            sort_charge_list = [[dcstudy.defect_cell.ID, dcstudy.defect_cell.charge] for dcstudy in list(defstudy.defect_cell_studies.values())]
             sort_charge_list.sort(key=lambda x: x[1])
             n_dcstudy = 0
-            if 'def_study_dict' not in self.mem[projid].keys():
+            if 'def_study_dict' not in list(self.mem[projid].keys()):
                 self.mem[projid]['def_study_dict'] = {}
             for dcsid, charge in sort_charge_list:
                 dcstudy = defstudy.defect_cell_studies[dcsid]
@@ -557,15 +564,15 @@ class ProjectsManager(object):
         
         # remove defect studies in Material study from tree
         try:
-            [self.delete_tree_entry(projid, defstud.ID, header=self.mem[projid]['defect_studies_header']) for defstud in newms.defect_studies.values()]
+            [self.delete_tree_entry(projid, defstud.ID, header=self.mem[projid]['defect_studies_header']) for defstud in list(newms.defect_studies.values())]
         except KeyError:
             pass
-        if (len(project.defect_studies.keys()) == 0) and ('defect_studies_header' in self.mem[projid]):
+        if (len(list(project.defect_studies.keys())) == 0) and ('defect_studies_header' in self.mem[projid]):
             self.tree.delete(self.mem[projid]['defect_studies_header'])
             self.mem[projid].pop('defect_studies_header')
     
     def add_defect_study_to_material_study(self, argdefstudy, matstudy, projid):
-        if argdefstudy.ID not in [defstudy.ID for defstudy in matstudy.defect_studies.values()]:
+        if argdefstudy.ID not in [defstudy.ID for defstudy in list(matstudy.defect_studies.values())]:
             # add Defect Study to Core Object
             matstudy.add_defect_study(argdefstudy)
             # delete Defect Study tree entry under Defect Studies header
@@ -573,7 +580,7 @@ class ProjectsManager(object):
             self.mem[projid]['def_study_dict'].pop(argdefstudy.ID)
             defstudyentry = self.tree.insert(self.mem[projid][matstudy.ID]['matstudentry'], self.mem[projid][matstudy.ID]['n_defect_studies'], text=argdefstudy.treetitle, values = [projid, argdefstudy.ID])
             self.mem[projid]['def_study_dict'][argdefstudy.ID] = defstudyentry
-            sort_charge_list = [[dcstudy.defect_cell.ID, dcstudy.defect_cell.charge] for dcstudy in argdefstudy.defect_cell_studies.values()]
+            sort_charge_list = [[dcstudy.defect_cell.ID, dcstudy.defect_cell.charge] for dcstudy in list(argdefstudy.defect_cell_studies.values())]
             sort_charge_list.sort(key=lambda x: x[1])
             n_dcstudy = 0
             for dcsid, charge in sort_charge_list:
@@ -581,12 +588,12 @@ class ProjectsManager(object):
                 def_cell_study_entry = self.tree.insert(defstudyentry, n_dcstudy, text = dcstudy.defect_cell.treetitle, values = [projid, dcsid])
                 n_dcstudy += 1
             self.mem[projid][matstudy.ID]['n_defect_studies'] += 1
-            if (len(self.mainwindow.projects[projid].defect_studies.keys()) == 0) and ('defect_studies_header' in self.mem[projid]):
+            if (len(list(self.mainwindow.projects[projid].defect_studies.keys())) == 0) and ('defect_studies_header' in self.mem[projid]):
                 self.tree.delete(self.mem[projid]['defect_studies_header'])
                 self.mem[projid].pop('defect_studies_header')
     
     def remove_defect_study_from_material_study(self, argdefstudy, matstudy, projid):
-        print 'Removing Defect Study ' + argdefstudy.treetitle + ' fom Material Study ' + matstudy.treetitle
+        print('Removing Defect Study ' + argdefstudy.treetitle + ' fom Material Study ' + matstudy.treetitle)
         oldID = argdefstudy.ID
         matstudy.defect_studies.pop(oldID)
         self.mainwindow.projects[projid].add_defect_study(argdefstudy)
@@ -595,7 +602,7 @@ class ProjectsManager(object):
     def new_project(self, project):
         index = int(project.pid.replace('P',''))
         proj = self.tree.insert("" , index, text = project.name, values = [project.pid, project.pid])
-        if project.pid not in self.mem.keys():
+        if project.pid not in list(self.mem.keys()):
             self.mem[project.pid] = {'proj': proj}
         # cells_header = self.tree.insert(proj, 1, text = 'Calculations', values = [project.pid, 'title-entry'])
         cells_header = self.tree.insert(proj, 1, text = 'Calculations', values = [project.pid, 'title-entry-calculation'])
@@ -615,12 +622,12 @@ class ProjectsManager(object):
         if project.chemical_potentials is not None and host is not None:
             self.new_chemical_potentials(project.pid)
         # List of Defect Studies
-        sortmslist = [[dstud.treetitle, dstud] for dstud in project.defect_studies.values()]
+        sortmslist = [[dstud.treetitle, dstud] for dstud in list(project.defect_studies.values())]
         sortmslist.sort(key=lambda x: x[0])
         for treetitle, dstud in sortmslist:
             self.new_defect_study(dstud, project.pid)
         # List of Material Studies
-        sortmslist = [[mstud.treetitle, mstud] for mstud in project.material_studies.values()]
+        sortmslist = [[mstud.treetitle, mstud] for mstud in list(project.material_studies.values())]
         sortmslist.sort(key=lambda x: x[0])
         for treetitle, mstud in sortmslist:
             self.new_material_study(mstud, project.pid)
@@ -649,28 +656,18 @@ class ProjectsManager(object):
                     
     def clear_studies(self, pid):
         if len(self.mainwindow.projects[pid].defect_studies)>0:
-            keys = self.mainwindow.projects[pid].defect_studies.keys()
+            keys = list(self.mainwindow.projects[pid].defect_studies.keys())
             for key in keys:
                 self.mainwindow.projects[pid].defect_studies.pop(key)
             self.delete_tree_category(pid, 'title-entry-ds') 
         if len(self.mainwindow.projects[pid].material_studies)>0:
-            keys = self.mainwindow.projects[pid].material_studies.keys()
+            keys = list(self.mainwindow.projects[pid].material_studies.keys())
             for key in keys:
                 self.mainwindow.projects[pid].material_studies.pop(key)
             self.delete_tree_category(pid, 'title-entry-ms')
     
     def delete_proj(self, project_id):
         self.tree.delete(self.mem[project_id]['proj'])
-    
-    def check_tree(self):
-        # print
-        for proj in self.mainwindow.projects.values():
-            print '\n\nproject %s: %s'%(proj.pid, proj.name)
-            print '\thost cell %s'%proj.cells[proj.hostcellid]
-            print '\tcells %s'%proj.cells.keys()
-            print '\tdefects %s'%proj.defects.keys()
-            print '\tdefect_studies %s'%proj.defect_studies.keys()
-            print '\tmaterial_studies %s'%proj.material_studies.keys()
 
 
 class FigureManager(object):
@@ -679,10 +676,10 @@ class FigureManager(object):
 
         self.mainwindow = mainwindow
         
-        self.tree = ttk.Treeview(parent)
+        self.tree = tkinter.ttk.Treeview(parent)
         self.tree.heading("#0", text = "Multiple Subplot Figures")
         
-        project_titles = [(project, project.pid) for project in self.mainwindow.projects.values()]
+        project_titles = [(project, project.pid) for project in list(self.mainwindow.projects.values())]
         project_titles.sort(key=lambda x:x[1])
         
         p = -1
@@ -691,7 +688,7 @@ class FigureManager(object):
             p += 1
             proj = self.tree.insert('', p, text=project.name)
             self.mem[project.pid] = {'proj': proj}
-            fig_names = [(fig, fig.name) for fig in project.mfigures.values()]
+            fig_names = [(fig, fig.name) for fig in list(project.mfigures.values())]
             fig_names.sort(key=lambda x:x[1])
             self.mem[project.pid].update({'nf':0})
             for mfigure, fname in fig_names:
@@ -792,17 +789,17 @@ class Project(object):
     def is_host(self, cell):
         return cell.ID == self.hostcellid
 
-    def add_defect(self, defect, defect_name):
-        name = defect.name
-        if name in self.defects.keys():
-            self.defects[defect.name].chem_pot = defect.chem_pot
-            self.defects[defect.name].nb_sites = defect.nb_sites
-            self.defects[defect.name].name = defect.name
-            print 'Defect %s edited successfully'%defect.name
+    def add_defect(self, defect, defect_displayname):
+        name = defect.displayname
+        if name in list(self.defects.keys()):
+            self.defects[defect.displayname].chem_pot = defect.chem_pot
+            self.defects[defect.displayname].nb_sites = defect.nb_sites
+            self.defects[defect.displayname].name = defect.name
+            print('Defect ' + defect.displayname + ' edited successfully')
         else:
-            defect.name = defect_name
-            self.defects[defect.name] = defect
-            print 'Defect %s created successfully'%defect.name
+            defect.displayname = defect_displayname
+            self.defects[defect.displayname] = defect
+            print('Defect ' + defect.displayname + ' created successfully')
 
     def add_cell(self, cell, dev = False):
         self.IDn += 1
@@ -820,9 +817,9 @@ class Project(object):
         self.IDn += 1
         # Remove all cells in defect_study from unbounded cells
         for defect_cell_study_key in defect_study.defect_cell_studies:
-            if defect_study.defect_cell_studies[defect_cell_study_key].defect_cell.ID in self.unboundcells.keys():
+            if defect_study.defect_cell_studies[defect_cell_study_key].defect_cell.ID in list(self.unboundcells.keys()):
                 self.unboundcells.pop(defect_study.defect_cell_studies[defect_cell_study_key].defect_cell.ID)
-        treetitle = bf.handle_same_string(defect_study.treetitle, [defstud.treetitle for defstud in self.defect_studies.values()])
+        treetitle = bf.handle_same_string(defect_study.treetitle, [defstud.treetitle for defstud in list(self.defect_studies.values())])
         self.defect_studies[self.pid + '/ID-defect-study-' + str(self.IDn)] = defect_study
         defect_study.ID = self.pid + '/ID-defect-study-' + str(self.IDn)
         defect_study.treetitle = treetitle
@@ -837,7 +834,7 @@ class Project(object):
                 self.defect_studies.pop(defect_study_key)
             except KeyError:
                 pass
-        treetitle = bf.handle_same_string(material_study.treetitle,[matstud.treetitle for matstud in self.material_studies.values()])
+        treetitle = bf.handle_same_string(material_study.treetitle,[matstud.treetitle for matstud in list(self.material_studies.values())])
         self.material_studies[self.pid + '/ID-material-study-' + str(self.IDn)] = material_study
         material_study.ID = self.pid + '/ID-material-study-' + str(self.IDn)
         material_study.treetitle = treetitle
@@ -849,25 +846,25 @@ class Project(object):
         removeID = objid
         if self.object_str_type(objid) == 'cell':
             for key in self.defect_studies:
-                for defectcellstudy in self.defect_studies[key].defect_cell_studies.values():
+                for defectcellstudy in list(self.defect_studies[key].defect_cell_studies.values()):
                     try:
                         if objid == defectcellstudy.defect_cell.ID:
                             res = True
                             containerID = self.defect_studies[key].ID
                             removeID = defectcellstudy.ID
-                    except Exception, e:
+                    except Exception as e:
                         self.mainwindow.printerror(str(e))
-            for material_study in self.material_studies.values():
-                for defect_study in material_study.defect_studies.values():
-                    for defect_cell_study in defect_study.defect_cell_studies.values():
+            for material_study in list(self.material_studies.values()):
+                for defect_study in list(material_study.defect_studies.values()):
+                    for defect_cell_study in list(defect_study.defect_cell_studies.values()):
                         if objid == defect_cell_study.defect_cell.ID:
                             res = True
                             containerID = material_study.ID
                             removeID = defect_study.ID + '//' + defect_cell_study.ID
         elif self.object_str_type(objid) == 'defect-study':
             containerID, removeID = '', ''
-            for material_study in self.material_studies.values():
-                for defect_study in material_study.defect_studies.values():
+            for material_study in list(self.material_studies.values()):
+                for defect_study in list(material_study.defect_studies.values()):
                     if defect_study.ID == objid:
                         res = True
                         containerID = material_study.ID

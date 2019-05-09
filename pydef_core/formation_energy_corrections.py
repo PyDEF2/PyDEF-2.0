@@ -1,10 +1,3 @@
-"""
-    Ensemble of corrections to the defect formation energy
-    version: 1.0.0
-    author: Emmanuel Pean
-    e-mail: emmanuel.pean@gmail.com
-"""
-
 import numpy as np
 import pydef_core.figure as pf
 import pydef_core.basic_functions as bf

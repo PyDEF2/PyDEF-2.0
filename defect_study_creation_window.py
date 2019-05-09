@@ -5,12 +5,12 @@
     email: adrien.stoliaroff@cnrs-imn.fr
 """
 
-import Tkinter as tk
-from Tkinter import Tk, Frame, Menu, Button, Label
-from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, SUNKEN, ALL
+import tkinter as tk
+from tkinter import Tk, Frame, Menu, Button, Label
+from tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, SUNKEN, ALL
 from PIL import Image, ImageTk
 
-import ttk 
+import tkinter.ttk 
 import tkinter_utilities as tu 
 import re
 
@@ -24,7 +24,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
     def __init__(self, mainwindow, project, defect_study_to_edit):
 
         tk.Toplevel.__init__(self, mainwindow)
-        self.minsize(width=self.winfo_screenwidth()/2, height=self.winfo_screenheight()/2)
+        self.minsize(width=self.winfo_screenwidth()//2, height=self.winfo_screenheight()//2)
         self.mainwindow = mainwindow
         self.title('Defect Study Creation Window: Defect Creation')
         self.width=self.winfo_width()
@@ -62,7 +62,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
             if self.defect_creation_frame.nb_sites.get() != '':
                 try:
                     nb_sites = float(self.defect_creation_frame.nb_sites.get())
-                except ValueError, e:
+                except ValueError as e:
                     self.mainwindow.printerror('Mistyping? Please specify a float value for the number of sites')
             else:
                 nb_sites=None
@@ -90,7 +90,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
         if self.step == 0:
             key = self.defect_creation_frame.name_entry.get()
             self.project.defects.pop(key)
-            print 'Deleted Defect ' + self.defect_creation_frame.name_entry.get()
+            print('Deleted Defect ' + self.defect_creation_frame.name_entry.get())
             self.defect_creation_frame.update_defect_frame(delete=True)
 
     def next_frame(self):
@@ -123,7 +123,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
                         self.step += 1
                 except ValueError:
                     self.mainwindow.printerror('Chemical potentials must be negative or null floats!')
-                except bf.PyDEFDefectCreationError, e:
+                except bf.PyDEFDefectCreationError as e:
                     self.mainwindow.printerror(str(e))
             elif self.step == 1:
                 # Create Defect Study
@@ -148,7 +148,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
                 
                 if self.defect_corrections_frame.host_cell_b_var.get() != 'None':
                     host_cell_b_treetitle = self.defect_corrections_frame.host_cell_b_var.get()
-                    host_cell_b_id = [cell.ID for cell in self.project.cells.values() if cell.treetitle == host_cell_b_treetitle][0]
+                    host_cell_b_id = [cell.ID for cell in list(self.project.cells.values()) if cell.treetitle == host_cell_b_treetitle][0]
                     host_cell_b = self.project.cells[host_cell_b_id]
                 else:
                     host_cell_b = self.project.cells[self.project.hostcellid]
@@ -192,7 +192,7 @@ class DefectStudyCreationWindow(tk.Toplevel):
                         message += ' corrections)'
                     elif len(corrlist)==1:
                         message += ' correction)'
-                    print message
+                    print(message)
                 else:
                     self.defect_study.host_cell_b = host_cell_b
                     self.defect_study.e_r = e_r
@@ -209,9 +209,9 @@ class DefectStudyCreationWindow(tk.Toplevel):
                 self.title('Defect Study Creation Window: Populate Defect Study')
                 self.defect_populate_frame = DefectStudyPopulateFrame(self, self.project, self.mainwindow, self.defect_study)
                 self.step += 1
-        except bf.PyDEFDefectCreationError, e:
+        except bf.PyDEFDefectCreationError as e:
             self.mainwindow.printerror(str(e))
-        except ValueError, e:
+        except ValueError as e:
             self.mainwindow.printerror(str(e))
 
     def previous_frame(self):
@@ -270,7 +270,7 @@ class DefectCreationFrame(object):
                 self.chem_pot_entry2.delete(0, END)
                 self.chem_pot_entry2.insert(0, str(dc.FERE[chemical_species]))
         except KeyError:
-            print 'Warning! No chemical potential referenced by default for ' + chemical_species + '! Please specify it yourself'
+            print('Warning! No chemical potential referenced by default for ' + chemical_species + '! Please specify it yourself')
 
     def atom_entry_check(self, arg):
         rex = re.compile("^([A-Z][a-z]|[A-Z]) [(](.|..|...)[)]")
@@ -285,7 +285,7 @@ class DefectCreationFrame(object):
             return False
 
     def update_existing_defect_list(self):
-        self.existing_defects_list = [displayname for displayname in self.project.defects.keys()]
+        self.existing_defects_list = [displayname for displayname in list(self.project.defects.keys())]
         self.name_entry.configure(values=self.existing_defects_list)
 
     def update_defect_frame(self, event=None, delete=False):
@@ -294,21 +294,21 @@ class DefectCreationFrame(object):
             self.name_entry.set('')
             try:
                 self.atom_entry.set('')
-            except AttributeError, e:
+            except AttributeError as e:
                 self.atom_entry.delete(0, END)
             try:
                 self.chem_pot_entry.set('')
-            except AttributeError, e:
+            except AttributeError as e:
                 self.chem_pot_entry.delete(0, END)
             try:
                 self.atom_entry2.delete(0, END)
                 self.chem_pot_entry2.delete(0, END)
-            except AttributeError, e:
+            except AttributeError as e:
                 pass
         try:
             selected_defect = self.project.defects[self.name_entry.get()]
             self.select_defect_type(selected_defect.defect_type)
-            print 'Viewing Defect ' + selected_defect.displayname
+            print('Viewing Defect ' + selected_defect.displayname)
             if selected_defect.defect_type == 'Substitutional':
                 try:
                     self.atom_entry.set(selected_defect.atom[0])
@@ -332,7 +332,7 @@ class DefectCreationFrame(object):
                     self.label41.destroy()
                     self.atom_entry2.destroy()
                     self.chem_pot_entry2.destroy()
-                except AttributeError, e:
+                except AttributeError as e:
                     pass
                 self.atom_entry.destroy()
                 self.atom_entry = tk.Entry(self.entries_pane, validate='focusout', validatecommand=lambda: self.atom_entry_check(self.atom_entry))
@@ -346,10 +346,10 @@ class DefectCreationFrame(object):
                     self.label41.destroy()
                     self.atom_entry2.destroy()
                     self.chem_pot_entry2.destroy()
-                except AttributeError, e:
+                except AttributeError as e:
                     pass
                 self.atom_entry.destroy()
-                self.atom_entry = ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
+                self.atom_entry = tkinter.ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
                 self.atom_entry.grid(row=0, column=1, sticky='nsew')
                 self.atom_entry.bind("<<ComboboxSelected>>", self.chemical_species_update)
                 self.atom_entry.set(selected_defect.atom[0])
@@ -374,7 +374,7 @@ class DefectCreationFrame(object):
                 self.chem_pot_entry.delete(0, END)
                 self.label3.configure(text='Removed atom')
                 self.atom_entry.destroy()
-                self.atom_entry = ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
+                self.atom_entry = tkinter.ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
                 self.atom_entry.grid(row=0, column=1, sticky='nsew')
                 self.atom_entry.bind("<<ComboboxSelected>>", self.chemical_species_update)
                 try:
@@ -395,7 +395,7 @@ class DefectCreationFrame(object):
                 self.label31 = tk.Label(self.entries_pane, text=' with atom ', padx=20)
                 self.label31.grid(row=0, column=2)
                 self.atom_entry.destroy()
-                self.atom_entry = ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
+                self.atom_entry = tkinter.ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
                 self.atom_entry.bind("<<ComboboxSelected>>", self.chemical_species_update)
                 self.atom_entry.grid(row=0, column=1, sticky='nsew')
                 self.label4.configure(text='Chemical potential of the chemical species')
@@ -448,8 +448,8 @@ class DefectCreationFrame(object):
         label1 = tk.Label(self.existing_defects_pane, text = 'Defect name', padx = 20)
         label1.grid(row = 0, column = 0, sticky = 'nsew')
 
-        self.existing_defects_list = [d.displayname for d in project.defects.values()]
-        self.name_entry = ttk.Combobox(self.existing_defects_pane, values=self.existing_defects_list)
+        self.existing_defects_list = [d.displayname for d in list(project.defects.values())]
+        self.name_entry = tkinter.ttk.Combobox(self.existing_defects_pane, values=self.existing_defects_list)
         self.name_entry.grid(row = 0, column = 1, sticky = 'nsew')
         self.name_entry.bind("<<ComboboxSelected>>", self.update_defect_frame)
 
@@ -493,7 +493,7 @@ class DefectCreationFrame(object):
 
         self.atoms_list = list(project.cells[project.hostcellid].atoms)
 
-        self.atom_entry = ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
+        self.atom_entry = tkinter.ttk.Combobox(self.entries_pane, values=self.atoms_list, state='readonly')
         self.atom_entry.bind("<<ComboboxSelected>>", self.chemical_species_update)
         self.atom_entry.grid(row=0, column=1, sticky='nsew')
 
@@ -510,7 +510,7 @@ class DefectCreationFrame(object):
         # ---------------------  ADDITIONNAL INFO  -----------------------
         
         self.label5 = tk.Label(self.defect_creation_frame, text='Optionnal information', font = '-weight bold')
-        self.add_info_pane = ttk.LabelFrame(self.defect_creation_frame, labelwidget=self.label5)
+        self.add_info_pane = tkinter.ttk.LabelFrame(self.defect_creation_frame, labelwidget=self.label5)
         
         tk.Label(self.add_info_pane, text='Number of sites (required for Concentrations computations)').grid(row=0,column=0)
         self.nb_sites = tk.Entry(self.add_info_pane)
@@ -565,9 +565,9 @@ class DefectStudyCreationFrame(object):
                 string += gap[1] + ' (' + str(gap[0]) + ' eV);' 
             self.gaps_var.set(string)
         # Name
-        ttk.Label(self.input_frame, text='Defect Study Name', width=15, anchor='w'
+        tkinter.ttk.Label(self.input_frame, text='Defect Study Name', width=15, anchor='w'
                   ).grid(row=0, column=0, padx=3, pady=3)
-        ttk.Entry(self.input_frame, textvariable=self.defect_study_id_var
+        tkinter.ttk.Entry(self.input_frame, textvariable=self.defect_study_id_var
                   ).grid(row=0, column=1, sticky='we', padx=3, pady=3)
 
         # Defects
@@ -581,11 +581,11 @@ class DefectStudyCreationFrame(object):
         in_label = self.defect_study_id_var.get() + ' defects'
         if self.defect_study_id_var.get() == 'automatic':
             in_label = 'New Defect Study Defects'
-        self.defect_title = ttk.Label(self.defect_study_creation_frame, text='Defect(s)', width=15, anchor='center', font=('', '16', 'bold'))
+        self.defect_title = tkinter.ttk.Label(self.defect_study_creation_frame, text='Defect(s)', width=15, anchor='center', font=('', '16', 'bold'))
         self.defect_frame = tu.ItemsChoiceFrame(self.defect_study_creation_frame, self.project.defects, items_on, in_label, self.project.name + ' defects', self.defect_title)
 
         # Gaps input
-        self.gap_title = ttk.Label(self.defect_study_creation_frame, text='Displayed Gaps', width=15, anchor='center', font=('', '16', 'bold'))
+        self.gap_title = tkinter.ttk.Label(self.defect_study_creation_frame, text='Displayed Gaps', width=15, anchor='center', font=('', '16', 'bold'))
         self.gap_input_frame = tu.GapInputFrame(self.defect_study_creation_frame, self.gaps_var, self.gap_title)
 
         # Buttons
@@ -624,8 +624,8 @@ class DefectStudyCorrectionsFrame(object):
         # --------------------------------------------------------------------------------------------------------------
 
         self.correction_frame = tk.Frame(self.defect_study_corrections_frame)
-        self.corr_frame_label = ttk.Label(self.correction_frame, text='Corrections', font=('', '16', 'bold'))
-        self.corr_frame = ttk.LabelFrame(self.correction_frame, labelwidget=self.corr_frame_label, labelanchor='n')
+        self.corr_frame_label = tkinter.ttk.Label(self.correction_frame, text='Corrections', font=('', '16', 'bold'))
+        self.corr_frame = tkinter.ttk.LabelFrame(self.correction_frame, labelwidget=self.corr_frame_label, labelanchor='n')
         self.corr_frame.grid(row=1, column=0, sticky='nswe', padx=10, pady=3)
         self.corr_frame.grid_columnconfigure(0, weight=1)
 
@@ -680,51 +680,51 @@ class DefectStudyCorrectionsFrame(object):
                 self.add_de_cbm.configure(state='enabled')
 
         # Checkboxes
-        self.gap_corr_frame_labelframe = ttk.Frame(self.correction_frame)
-        ttk.Checkbutton(self.gap_corr_frame_labelframe, text='VBM correction', variable=self.vbm_corr_var, onvalue=True,
+        self.gap_corr_frame_labelframe = tkinter.ttk.Frame(self.correction_frame)
+        tkinter.ttk.Checkbutton(self.gap_corr_frame_labelframe, text='VBM correction', variable=self.vbm_corr_var, onvalue=True,
                         offvalue=False, style='Bold.TCheckbutton', command=enable_gap_corr_frame).pack(side='left')
-        ttk.Checkbutton(self.gap_corr_frame_labelframe, text='PHS correction', variable=self.phs_corr_var, onvalue=True,
+        tkinter.ttk.Checkbutton(self.gap_corr_frame_labelframe, text='PHS correction', variable=self.phs_corr_var, onvalue=True,
                         offvalue=False, style='Bold.TCheckbutton', command=enable_gap_corr_frame).pack(side='right')
 
         # LabelFrame
-        self.gap_corr_frame = ttk.LabelFrame(self.corr_frame, labelwidget=self.gap_corr_frame_labelframe,
+        self.gap_corr_frame = tkinter.ttk.LabelFrame(self.corr_frame, labelwidget=self.gap_corr_frame_labelframe,
                                              labelanchor='n')
         self.gap_corr_frame.grid(row=3, column=0, columnspan=2, sticky='we', padx=5, pady=5)
         self.gap_corr_frame.grid_columnconfigure(1, weight=1)
 
         # Host Cell B
-        ttk.Label(self.gap_corr_frame, text='Host cell (better gap)').grid(row=0, column=0)
+        tkinter.ttk.Label(self.gap_corr_frame, text='Host cell (better gap)').grid(row=0, column=0)
         def treetitle_if_not_host(cell):
             if cell.ID != project.hostcellid: 
                 return cell.treetitle
-        host_cell_b_list = [treetitle_if_not_host(d) for d in self.project.unboundcells.values() if treetitle_if_not_host(d) is not None]
-        self.host_cell_b_ccb = ttk.Combobox(self.gap_corr_frame, values=host_cell_b_list,
+        host_cell_b_list = [treetitle_if_not_host(d) for d in list(self.project.unboundcells.values()) if treetitle_if_not_host(d) is not None]
+        self.host_cell_b_ccb = tkinter.ttk.Combobox(self.gap_corr_frame, values=host_cell_b_list,
                                             textvariable=self.host_cell_b_var, state='readonly') # , values=self.project.Cells.keys() + ['None']
         self.host_cell_b_var.set('None')
         self.host_cell_b_ccb.grid(row=0, column=1, sticky='we', padx=3, pady=3)
 
         # VBM & CBM correction frames
-        self.vbm_corr_frame = ttk.Frame(self.gap_corr_frame)
+        self.vbm_corr_frame = tkinter.ttk.Frame(self.gap_corr_frame)
         self.vbm_corr_frame.grid(row=1, column=0, columnspan=2)
-        self.cbm_corr_frame = ttk.Frame(self.gap_corr_frame)
+        self.cbm_corr_frame = tkinter.ttk.Frame(self.gap_corr_frame)
         self.cbm_corr_frame.grid(row=2, column=0, columnspan=2)
 
-        ttk.Label(self.vbm_corr_frame, text='Additional correction to the VBM energy: ').pack(side='left')
-        ttk.Label(self.cbm_corr_frame, text='Additional correction to the CBM energy: ').pack(side='left')
+        tkinter.ttk.Label(self.vbm_corr_frame, text='Additional correction to the VBM energy: ').pack(side='left')
+        tkinter.ttk.Label(self.cbm_corr_frame, text='Additional correction to the CBM energy: ').pack(side='left')
 
-        self.add_de_vbm = ttk.Entry(self.vbm_corr_frame, textvariable=self.de_vbm_input_var, width=6)
+        self.add_de_vbm = tkinter.ttk.Entry(self.vbm_corr_frame, textvariable=self.de_vbm_input_var, width=6)
         self.add_de_vbm.pack(side='left')
-        self.add_de_cbm = ttk.Entry(self.cbm_corr_frame, textvariable=self.de_cbm_input_var, width=6)
+        self.add_de_cbm = tkinter.ttk.Entry(self.cbm_corr_frame, textvariable=self.de_cbm_input_var, width=6)
         self.add_de_cbm.pack(side='left')
 
-        ttk.Label(self.vbm_corr_frame, text='eV dEV(tot)=').pack(side='left')
-        ttk.Label(self.cbm_corr_frame, text='eV dEC(tot)=').pack(side='left')
+        tkinter.ttk.Label(self.vbm_corr_frame, text='eV dEV(tot)=').pack(side='left')
+        tkinter.ttk.Label(self.cbm_corr_frame, text='eV dEC(tot)=').pack(side='left')
 
-        ttk.Entry(self.vbm_corr_frame, textvariable=self.tot_de_vbm_var, state='disabled', width=6).pack(side='left')
-        ttk.Entry(self.cbm_corr_frame, textvariable=self.tot_de_cbm_var, state='disabled', width=6).pack(side='left')
+        tkinter.ttk.Entry(self.vbm_corr_frame, textvariable=self.tot_de_vbm_var, state='disabled', width=6).pack(side='left')
+        tkinter.ttk.Entry(self.cbm_corr_frame, textvariable=self.tot_de_cbm_var, state='disabled', width=6).pack(side='left')
 
-        ttk.Label(self.vbm_corr_frame, text='eV').pack(side='left')
-        ttk.Label(self.cbm_corr_frame, text='eV').pack(side='left')
+        tkinter.ttk.Label(self.vbm_corr_frame, text='eV').pack(side='left')
+        tkinter.ttk.Label(self.cbm_corr_frame, text='eV').pack(side='left')
 
         def get_tot_gap_corr(event):
             """ Retrieve the total VBM correction """
@@ -766,13 +766,13 @@ class DefectStudyCorrectionsFrame(object):
             
         # --------------------------------------- POTENTIAL ALIGNMENT CORRECTION ---------------------------------------
 
-        ttk.Checkbutton(self.corr_frame, text='Potential alignment correction', onvalue=True, offvalue=False,
+        tkinter.ttk.Checkbutton(self.corr_frame, text='Potential alignment correction', onvalue=True, offvalue=False,
                         variable=self.pa_corr_var, style='Bold.TCheckbutton', command=retrieve
                         ).grid(row=4, column=0, columnspan=2, pady=5)
 
         # ------------------------------------------ MOSS-BURSTEIN CORRECTION ------------------------------------------
 
-        ttk.Checkbutton(self.corr_frame, text='Moss-Burstein correction', onvalue=True, offvalue=False,
+        tkinter.ttk.Checkbutton(self.corr_frame, text='Moss-Burstein correction', onvalue=True, offvalue=False,
                         variable=self.mb_corr_var, style='Bold.TCheckbutton', command=retrieve 
                         ).grid(row=5, column=0, columnspan=2, pady=5)
 
@@ -787,26 +787,26 @@ class DefectStudyCorrectionsFrame(object):
             else:
                 tu.disable_frame(self.mp_frame)
 
-        self.mp_frame_label = ttk.Checkbutton(self.correction_frame, text='Makov-Payne correction', variable=self.mp_corr_var,
+        self.mp_frame_label = tkinter.ttk.Checkbutton(self.correction_frame, text='Makov-Payne correction', variable=self.mp_corr_var,
                                               onvalue=True, offvalue=False, style='Bold.TCheckbutton', command=enable_mp_frame)
-        self.mp_frame = ttk.LabelFrame(self.corr_frame, labelwidget=self.mp_frame_label, labelanchor='n')
+        self.mp_frame = tkinter.ttk.LabelFrame(self.corr_frame, labelwidget=self.mp_frame_label, labelanchor='n')
         self.mp_frame.grid(row=6, column=0, columnspan=2, sticky='we', padx=5, pady=5)
         self.mp_frame.grid_columnconfigure(0, weight=1)
         
         # Geometry
-        ttk.Label(self.mp_frame, text='Geometry of the host cell').grid(row=0, column=0)
-        ttk.Combobox(self.mp_frame, values=['sc', 'fcc', 'bcc', 'hcp', 'other'], textvariable=self.geometry_var,
+        tkinter.ttk.Label(self.mp_frame, text='Geometry of the host cell').grid(row=0, column=0)
+        tkinter.ttk.Combobox(self.mp_frame, values=['sc', 'fcc', 'bcc', 'hcp', 'other'], textvariable=self.geometry_var,
                      state='readonly', width=5).grid(row=0, column=1)
 
         # Relative permittivity
-        ttk.Label(self.mp_frame, text='Relative permittivity').grid(row=1, column=0)
-        ttk.Entry(self.mp_frame, textvariable=self.rel_perm, width=7).grid(row=1, column=1)
+        tkinter.ttk.Label(self.mp_frame, text='Relative permittivity').grid(row=1, column=0)
+        tkinter.ttk.Entry(self.mp_frame, textvariable=self.rel_perm, width=7).grid(row=1, column=1)
 
         # Makov-Payne correction for e_r=1 and q=1
         self.mp_ratio_image = ImageTk.PhotoImage(Image.open('Pictures/Makov_Payne_ratio_small.png'))
-        ttk.Label(self.mp_frame, text='Value of the ratio (eV)', compound='right'
+        tkinter.ttk.Label(self.mp_frame, text='Value of the ratio (eV)', compound='right'
                   , image=self.mp_ratio_image).grid(row=2, column=0)
-        ttk.Entry(self.mp_frame, textvariable=self.mk_1_1_var, width=7).grid(row=2, column=1)
+        tkinter.ttk.Entry(self.mp_frame, textvariable=self.mk_1_1_var, width=7).grid(row=2, column=1)
         
         if self.defect_study.vbm_correction is False and self.defect_study.phs_correction is False:
             self.host_cell_b_ccb.configure(state='disabled')
@@ -822,7 +822,7 @@ class DefectStudyCorrectionsFrame(object):
         self.previous_button = Button(self.button_pane1, text = '<< Previous', command=parent.previous_frame)
         try:
             self.next_button = Button(self.button_pane1, text = 'Next>>', command=parent.next_frame)
-        except bf.PyDEFDefectCreationError, e:
+        except bf.PyDEFDefectCreationError as e:
             selfparent.mainwindow.printerror(str(e))
         self.cancel_button = Button(self.button_pane1, text = 'Cancel', command=parent.cancel)
         self.previous_button.grid(row = 0, column = 0)
@@ -850,12 +850,12 @@ class DefectStudyPopulateFrame(object):
         # ------------------  ITEMS CHOICE FRAME  ----------------------
         
         def treetitle_if_not_host(cell):
-            if c.ID != project.hostcellid: 
-                return c.treetitle
+            if cell.ID != project.hostcellid: 
+                return cell.treetitle
 
-        items = [treetitle_if_not_host(c) for c in project.unboundcells.values()]
-        items_on = self.defect_study.defect_cell_studies.values()
-        self.cells_title = ttk.Label(self.defect_study_populate_frame, text='Charged cells', width=15, anchor='center', font=('', '16', 'bold'))
+        items = [treetitle_if_not_host(c) for c in list(project.unboundcells.values())]
+        items_on = list(self.defect_study.defect_cell_studies.values())
+        self.cells_title = tkinter.ttk.Label(self.defect_study_populate_frame, text='Charged cells', width=15, anchor='center', font=('', '16', 'bold'))
         self.cells_frame = DefectCellChoiceFrame(self.defect_study_populate_frame, items, items_on, self.defect_study.treetitle + ' cells', self.project.name + ' calculations', self.cells_title, self.defect_study, self.mainwindow)
 
         # ------------------  NAVIGATION BUTTONS  ----------------------
@@ -865,7 +865,7 @@ class DefectStudyPopulateFrame(object):
             if len(self.defect_study.defect_cell_studies)>0:
                 parent.plot(close=close)
             else:
-                print 'Warning! Impossible to plot Defect Formation Energies for empty Defect Study ' + self.defect_study.treetitle
+                print('Warning! Impossible to plot Defect Formation Energies for empty Defect Study ' + self.defect_study.treetitle)
                 if close :
                     parent.cancel(ok=True)
 
@@ -908,7 +908,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
         self.defect_study = defect_study
         self.mainwindow = mainwindow
 
-        self.main_frame = ttk.LabelFrame(parent, labelwidget=labeltitle)
+        self.main_frame = tkinter.ttk.LabelFrame(parent, labelwidget=labeltitle)
         
         items_on_list_name = [dsc.defect_cell.treetitle for dsc in items_on]
 
@@ -916,13 +916,13 @@ class DefectCellChoiceFrame(tk.Toplevel):
 
         # -------------------------------------------------- ITEMS OFF -------------------------------------------------
 
-        self.frame_off = ttk.LabelFrame(self.main_frame, text=label_off)
+        self.frame_off = tkinter.ttk.LabelFrame(self.main_frame, text=label_off)
 
         self.list_off = tk.Listbox(self.frame_off)  # list containing element not plotted
         self.list_off.config(height=5)
         self.list_off.pack(side='right')
         if (len(items_off) or len(items_on))>5:
-            self.yscrollbar_off = ttk.Scrollbar(self.frame_off, orient='vertical')
+            self.yscrollbar_off = tkinter.ttk.Scrollbar(self.frame_off, orient='vertical')
             self.list_off.pack(side='left', fill='both')
             self.yscrollbar_off.pack(side='right', fill='y')
             self.list_off.config(yscrollcommand=self.yscrollbar_off.set)
@@ -940,7 +940,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
         self.delete_button = {}
         self.dcsids = {}
 
-        self.on_frame = ttk.LabelFrame(self.main_frame, text=label_on)
+        self.on_frame = tkinter.ttk.LabelFrame(self.main_frame, text=label_on)
 
         """self.list_on = tk.Listbox(self.on_frame)
         self.list_on.config(height=5)
@@ -969,7 +969,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
 
         # --------------------------------------------------- BUTTONS --------------------------------------------------
 
-        self.button_frame = ttk.Frame(self.main_frame)
+        self.button_frame = tkinter.ttk.Frame(self.main_frame)
         
         tk.Button(self.button_frame, text='>', command=self.add_selection, bg='grey').pack(side='right', expand='True', fill='both')
         tk.Button(self.button_frame, text='>>', command=self.add_all, bg='grey').pack(side='right', expand='True', fill='both')
@@ -1014,7 +1014,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
                         else:
                             zlist[i] = 0
                     self.dcsids[items_ids].set_z(int(zlist[0]), int(zlist[1]))
-                    print 'Set number of free electrons in Conduction Band to ' + str(zlist[0]) + ' and number of holes in Valence Band to ' + str(zlist[1])
+                    print('Set number of free electrons in Conduction Band to ' + str(zlist[0]) + ' and number of holes in Valence Band to ' + str(zlist[1]))
                     return True
                         
     def radius_is_float(self, items_ids):
@@ -1024,7 +1024,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
             try:
                 float(radius)
                 self.dcsids[items_ids].set_radius(float(radius))
-                print 'Set exclusion sphere radius to ' + radius + ' A' 
+                print('Set exclusion sphere radius to ' + radius + ' A') 
                 return True
             except ValueError:
                 self.mainwindow.printerror('Given radius is not a float!')
@@ -1035,7 +1035,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
     def plot_pa(self, items_ids):
         
         self.dcsids[items_ids].plot_potential_alignment(False)
-        print 'Charged cell ' + self.dcsids[items_ids].defect_cell.treetitle + ': plot Potential Alignment'
+        print('Charged cell ' + self.dcsids[items_ids].defect_cell.treetitle + ': plot Potential Alignment')
         
     def add_dcs(self, dcs):
         items_ids = dcs.ID
@@ -1085,7 +1085,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
                 self.on_frame.nitemson += 1
                 self.list_off.delete(selected)
                 # add Defect Cell Study to Project and to tree
-                proj_cells = self.mainwindow.projects[self.mainwindow.currentprojectid].cells.values()
+                proj_cells = list(self.mainwindow.projects[self.mainwindow.currentprojectid].cells.values())
                 find_cell = [cell for cell in proj_cells if cell.treetitle == items_ids]
                 if self.defect_study.pa_correction and len(self.entry_radius[items_ids].get())>0:
                     radius = float(self.entry_radius[items_ids].get())
@@ -1099,7 +1099,7 @@ class DefectCellChoiceFrame(tk.Toplevel):
                 newdcs = self.defect_study.create_defect_cell_study(find_cell[0], radius, z_e, z_h)
                 self.dcsids[items_ids] = newdcs
                 self.mainwindow.pm.new_defect_cell_study(newdcs, self.mainwindow.currentprojectid, self.defect_study.ID, find_cell[0].ID)
-                print 'Successfully added charged cell ' + find_cell[0].treetitle + ' to Defect Study' + self.defect_study.treetitle
+                print('Successfully added charged cell ' + find_cell[0].treetitle + ' to Defect Study' + self.defect_study.treetitle)
 
     def remove_selection(self, dcid):
         """ Remove selected elements in the 'on' list and add them to the 'off' list """

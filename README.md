@@ -1,6 +1,6 @@
-# PyDEF 2.0
+# PyDEF 2.1
 
-PyDEF 2.0 is a scientific program.
+PyDEF 2.1 is a scientific program.
 It is a post-treatment software for ab-initio calculations performed
 with the Vienna Ab-Initio Simulation Package (VASP) 
 featuring a user-friendly Graphical User Interface (GUI). 
@@ -34,6 +34,7 @@ and launch main.py.
 ## Authors
 
 * **Mr. Adrien Stoliaroff**
+* **Mr. Valentin Ansart**
 * **Dr. Stéphane Jobic**
 * **Dr. Camille Latouche**
 

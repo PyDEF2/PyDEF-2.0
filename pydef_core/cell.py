@@ -5,6 +5,8 @@ import scipy.optimize as sco
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
+from mpl_toolkits.mplot3d import Axes3D
+
 import re
 import copy
 import math
@@ -22,7 +24,7 @@ class Cell(object):
         :param outcar_file: location of the OUTCAR file (string)
         :param doscar_file: location of the DOSCAR file (string) """
 
-        print 'Starting import...'
+        print('Starting import...')
 
         self.OUTCAR = outcar_file
         self.DOSCAR = doscar_file
@@ -57,13 +59,14 @@ class Cell(object):
         self._nb_atoms_tot = bf.grep(self.outcar, 'NIONS =', 0, False, 'int', 1)  # total number of atoms
         self._nb_atoms = bf.grep(self.outcar, 'ions per type =', 0, delimiter=None, data_type='int')
         self._atoms_types = get_atomic_species(self.outcar)  # chemical species
-        self._population = dict(zip(self._atoms_types, self._nb_atoms))
+        self._population = dict(list(zip(self._atoms_types, self._nb_atoms)))
         self._atoms_valence = bf.grep(self.outcar, 'ZVAL   =', -1, delimiter=None, data_type='int')  # valence
         self._atoms = np.concatenate([[f + ' (' + str(g) + ')' for g in range(1, q + 1)]
                                       for f, q in zip(self._atoms_types, self._nb_atoms)])  # atoms list
         self._nb_electrons = int(bf.grep(self.outcar, 'NELECT =', 0, 'total number', 'float', 1))  # number of electrons
         self._charge = sum(np.array(self._nb_atoms) * np.array(self._atoms_valence)) - self._nb_electrons  # charge
         self._orbitals = bf.grep(self.outcar, '# of ion', 0, 'tot', delimiter=None)
+        self._z = bf.get_gcd(self._nb_atoms)
 
         # Check the consistence of the data retrieved
         if self._nb_atoms_tot != sum(self._nb_atoms) or \
@@ -84,6 +87,9 @@ class Cell(object):
 
         # Crystallographic properties
         self._cell_parameters = get_cell_parameters(self.outcar)  # cristallographic parameters
+        self.a = bf.distance(self._cell_parameters[0,:],np.array([0,0,0]))
+        self.b = bf.distance(self._cell_parameters[1,:],np.array([0,0,0]))
+        self.c = bf.distance(self._cell_parameters[2,:],np.array([0,0,0]))
         self._atoms_positions = get_atoms_positions(self.outcar, self._atoms)  # atoms positions
         self._volume = np.linalg.det(self._cell_parameters) * 1e-30  # volume in m^3
 
@@ -100,7 +106,7 @@ class Cell(object):
         except ValueError:
             self._fermi_energy = None
         if self._fermi_energy is None:
-            print 'Warning! I could not retrieve the Fermi level, sorry...'
+            print('Warning! I could not retrieve the Fermi level, sorry...')
 
         self._nkpts = bf.grep(self.outcar, 'NKPTS =', 0, 'k-points in BZ', 'int', 1)  # number of k-points
         self._kpoints_coords, self._kpoints_weights = get_kpoints_weights_and_coords(self.outcar, self._nkpts)
@@ -112,8 +118,8 @@ class Cell(object):
             self._bands_energies, self._bands_positions, self._vbm_energy, self._cbm_energy, self._vb_energy, self._cb_energy, self.b_vbm, self.k_pts_vbm, self.b_cbm, self.k_pts_cbm, self.direct_band_gap = self.analyse_bands()
             self._gap = self._cbm_energy - self._vbm_energy  # electronic gap            
             
-        except TypeError, e:
-            print 'Warning! Could not retrieve bands data. This calculation may be a dielectric function calculation, or the file may be corrupted.'
+        except TypeError as e:
+            print('Warning! Could not retrieve bands data. This calculation may be a dielectric function calculation, or the file may be corrupted.')
             self._bands_data = None
             self._bands_energies = None
             self._bands_positions = None
@@ -166,12 +172,12 @@ class Cell(object):
             
         try:
             self.lastbpp = BandDiagramPlotParameters(self)
-            self.bfp = BandFitPlotParameters(self)
+            self.bfpp = BandFitPlotParameters(self)
             self.optical_indices = None 
         except TypeError:
             # if calculation is actually an optical indices calculation
             self.lastbpp = None
-            self.bfp = None
+            self.bfpp = None
             try:
                 self.optical_indices = oi.OpticalIndices(self.outcar) 
             except TypeError:
@@ -179,7 +185,7 @@ class Cell(object):
         self.gc = None # Geom Comparison
         
 
-        print('\nImport of calculation ' + self.treetitle + ' finished successfully!\n')
+        print(('\nImport of calculation ' + self.treetitle + ' finished successfully!\n'))
 
     @property
     def functional(self):
@@ -232,6 +238,10 @@ class Cell(object):
     @property
     def nb_atoms_tot(self):
         return self._nb_atoms_tot
+    
+    @property
+    def z(self):
+        return self._z
 
     @property
     def nb_atoms(self):
@@ -395,7 +405,7 @@ class Cell(object):
         if self.lorbit == 11:
             expected_doscar_length = 6 + sum(self._nb_atoms) * (self._nedos + 1) + self._nedos
             if doscar_length != expected_doscar_length:
-                print 'Warning! Found %i lines instead of %i as expected (%i atoms, NEDOS=%i)' % (doscar_length, expected_doscar_length, sum(self._nb_atoms), self._nedos)
+                print('Warning! Found %i lines instead of %i as expected (%i atoms, NEDOS=%i)' % (doscar_length, expected_doscar_length, sum(self._nb_atoms), self._nedos))
                 raise bf.PyDEFDoscarError('Analysing DoS... The DOSCAR file is not consistent with the OUTCAR file: '
                                      'length of DOSCAR content not as expected')
         else:
@@ -579,9 +589,9 @@ class Cell(object):
         if dpp.smooth:
             length = len(energy)
             if dpp.n_smooth %2 == 0:
-                energy = energy[dpp.n_smooth/2:length-dpp.n_smooth/2+1]
+                energy = energy[dpp.n_smooth//2:length-dpp.n_smooth//2+1]
             else:
-                energy = energy[dpp.n_smooth/2:length-dpp.n_smooth/2]
+                energy = energy[dpp.n_smooth//2:length-dpp.n_smooth//2]
         
         # Total DOS  
         if dpp.display_total_dos is True:
@@ -610,7 +620,10 @@ class Cell(object):
                         ax.plot(energy, total_dos_up, color='black', label='Total DOS', lw=dpp.lw)
                         ax.plot(energy, -total_dos_down, color='black', lw=dpp.lw)
                     else:
-                        ax.plot(energy, total_dos, color='black', label='Total DOS', lw=dpp.lw)
+                        if dpp.flip is True:
+                            ax.plot(total_dos, energy, color='black', label='Total DOS', lw=dpp.lw)
+                        else:
+                            ax.plot(energy, total_dos, color='black', label='Total DOS', lw=dpp.lw)
             
         # Projected DOS
         if dpp.display_proj_dos is True:
@@ -638,7 +651,7 @@ class Cell(object):
                             [ax.stackplot(energy, bf.moving_avg(f, dpp.n_smooth), color=g, lw=0) for f, g, h in zip(p_dos, colors, p_labels) if not bf.is_zero(f)]
                     else:
                         if spin_cond is True:
-                            print p_labels
+                            print(p_labels)
                             [ax.plot(energy, bf.moving_avg(f, dpp.n_smooth), c=g, label=h, lw=dpp.lw) for f, g, h in zip(p_dos_up, colors, p_labels) if not bf.is_zero(f)]
                             [ax.plot(energy, bf.moving_avg(-f, dpp.n_smooth), c=g, lw=dpp.lw) for f, g in zip(p_dos_down, colors) if not bf.is_zero(f)]
                         else:
@@ -668,13 +681,19 @@ class Cell(object):
                             [ax.stackplot(energy, f, color=g, labels=h, lw=dpp.lw) for f, g, h in zip(p_dos_up, colors, p_labels) if not bf.is_zero(f)]
                             [ax.stackplot(energy, f, color=g, lw=dpp.lw) for f, g in zip(p_dos_down, colors) if not bf.is_zero(f)]
                         else:
-                            ax.stackplot(energy, p_dos, colors=colors, lw=0, labels=p_labels)
+                            if dpp.flip is True:
+                                ax.stackplot(p_dos, energy, colors=colors, lw=0, labels=p_labels)
+                            else:
+                                ax.stackplot(energy, p_dos, colors=colors, lw=0, labels=p_labels)
                     else:
                         if spin_cond is True:
                             [ax.plot(energy, f, c=g, label=h, lw=dpp.lw) for f, g, h in zip(p_dos_up, colors, p_labels) if not bf.is_zero(f)]
                             [ax.plot(energy, -f, c=g, lw=dpp.lw) for f, g in zip(p_dos_down, colors) if not bf.is_zero(f)]
                         else:
-                            [ax.plot(energy, f, c=g, label=h, lw=dpp.lw) for f, g, h in zip(p_dos, colors, p_labels) if not bf.is_zero(f)]
+                            if dpp.flip is True:
+                                [ax.plot(f, energy, c=g, label=h, lw=dpp.lw) for f, g, h in zip(p_dos, colors, p_labels) if not bf.is_zero(f)]
+                            else:
+                                [ax.plot(energy, f, c=g, label=h, lw=dpp.lw) for f, g, h in zip(p_dos, colors, p_labels) if not bf.is_zero(f)]
 
         # ------------------------------------------------ ANNOTATIONS -------------------------------------------------
 
@@ -688,10 +707,14 @@ class Cell(object):
         # Display fermi level
         if dpp.display_Fermi_level:
             if fermi_energy is not None:
-                ax.axvline(fermi_energy, ls='--', color='black')
-                ax.annotate('$E_F$', xy=(fermi_energy, 0.75), color='black', xycoords=('data', 'axes fraction')).draggable()
+                if dpp.flip is True:
+                    ax.axhline(fermi_energy, ls='--', color='black')
+                    ax.annotate('$E_F$', xy=(0.75, fermi_energy), color='black', xycoords=('data', 'axes fraction')).draggable()
+                else:
+                    ax.axvline(fermi_energy, ls='--', color='black')
+                    ax.annotate('$E_F$', xy=(fermi_energy, 0.75), color='black', xycoords=('data', 'axes fraction')).draggable()
             else:
-                print 'Warning! I could not retrieve the Fermi Energy, sorry...'
+                print('Warning! I could not retrieve the Fermi Energy, sorry...')
 
         if spin_cond:
             ax.pydef_anot = self.annotate_dos(ax)
@@ -712,10 +735,15 @@ class Cell(object):
         ylabel = 'DOS (states/eV)'
         
         ax.axhline(color='black')
+        if dpp.flip is True:
+            pf.set_ax_parameters(ax, title=dpp.title, xlabel=dpp.y_label, ylabel=dpp.x_label, xlim=[dpp.ymin, dpp.ymax], ylim=[dpp.xmin, dpp.xmax], legend=dpp.display_legends, grid=dpp.grid,
+                     fontsize=dpp.fontsize, l_fontsize=dpp.l_fontsize, xticks=dpp.yticks_var, xtick_labels=dpp.yticklabels_var, yticks=dpp.xticks_var,
+                     ytick_labels=dpp.xticklabels_var, title_fontsize=dpp.title_fontsize, tight=tight)
 
-        pf.set_ax_parameters(ax, title=dpp.title, xlabel=dpp.x_label, ylabel=dpp.y_label, xlim=[dpp.xmin, dpp.xmax], ylim=[dpp.ymin, dpp.ymax], legend=dpp.display_legends, grid=dpp.grid,
-                             fontsize=dpp.fontsize, l_fontsize=dpp.l_fontsize, xticks=dpp.xticks_var, xtick_labels=dpp.xticklabels_var, yticks=dpp.yticks_var,
-                             ytick_label=dpp.yticklabels_var, title_fontsize=dpp.title_fontsize, tight=tight)
+        else:
+            pf.set_ax_parameters(ax, title=dpp.title, xlabel=dpp.x_label, ylabel=dpp.y_label, xlim=[dpp.xmin, dpp.xmax], ylim=[dpp.ymin, dpp.ymax], legend=dpp.display_legends, grid=dpp.grid,
+                                 fontsize=dpp.fontsize, l_fontsize=dpp.l_fontsize, xticks=dpp.xticks_var, xtick_labels=dpp.xticklabels_var, yticks=dpp.yticks_var,
+                                 ytick_labels=dpp.yticklabels_var, title_fontsize=dpp.title_fontsize, tight=tight)
         
         if dpp.plot_areas and dpp.display_legends is True and dpp.display_proj_dos is True:
             # stackplot does not support math mode in legend
@@ -760,7 +788,19 @@ class Cell(object):
         return anot_up, anot_down
 
     def analyse_bands(self):
-        """ Analyse the band energies and positions """
+        """ Analyse the band energies and positions
+        Return:
+         band_energies a 2D-array where the 1st index is the band number and the 2nd index the kpoint number
+         positions 1D-array of cumulated interkpoint distances (not valid for Hybrid calculations, but taken care of in plot_band_diagram)
+         vbm_energy a float value corresponding to the Valence Band Maximum
+         cbm_energy a float value corresponding to the Conduction Band Minimum
+         vb_energy 1D-array corresponding to the Band containing the VBM
+         cb_energy 1D-array corresponding to the Band containing the CBM
+         b_vbm 1D-array of band indices corresponding to the Band(s) containing the VBM
+         k_pts_vbm 1D-array of k-pts indices for which VBM is reached
+         b_cbm 1D-array of band indices corresponding to the Band(s) containing the CBM
+         k_pts_vbm 1D-array of k-pts indices for which CBM is reached
+         direct_band_gap True if direct band gap False if indirect band gap"""
 
         bands_data = self.bands_data
         band_energies = np.transpose([f[0] for f in bands_data])  # energies of each band at each kpoint
@@ -787,8 +827,6 @@ class Cell(object):
         # K points
         x_values_temp = [bf.distance(f, g) for f, g in zip(self.kpoints_coords_r[:-1], self.kpoints_coords_r[1:])]
         positions = np.cumsum([0] + x_values_temp)
-        if self.ispin == 2:
-            positions = np.append(positions, positions)
 
         return band_energies, positions, vbm_energy, cbm_energy, vb_energy, cb_energy, b_vbm, k_pts_vbm, b_cbm, k_pts_cbm, direct_band_gap
 
@@ -800,7 +838,7 @@ class Cell(object):
         header = 'Positions' + separator + separator.join(['Band %s' % f for f in range(1, len(energies) + 1)])
         data = np.transpose(np.insert(energies, 0, positions, axis=0))
         np.savetxt(filename, data, header=header, delimiter=separator, comments='')
-        print self.treetitle + ' Bands exported successfully!'
+        print(self.treetitle + ' Bands exported successfully!')
     
     def export_dos(self, filename, separator):
         """Export the DoS"""
@@ -818,7 +856,7 @@ class Cell(object):
                 shift = - fermi_energy - dpp.input_shift
             else:
                 shift = - dpp.input_shift
-                print 'Warning! I could not retrieve Fermi energy, sorry...'
+                print('Warning! I could not retrieve Fermi energy, sorry...')
         else:
             shift = - dpp.input_shift
 
@@ -920,7 +958,7 @@ class Cell(object):
         
         data = np.transpose(data)
         np.savetxt(filename, data, header=header, delimiter=separator, comments='')
-        print self.treetitle + ' Density of states exported successfully!'
+        print(self.treetitle + ' Density of states exported successfully!')
 
 
     def plot_band_diagram(self, ax=None, bpp=None, tight=True):
@@ -932,13 +970,14 @@ class Cell(object):
         
         # energies
         if self.functional in ['HSE', 'PBE0', 'Hybrid']:
+            print('Hybrid detected')
             if bpp.nkpts_hybrid_bands == 0:
-                temp_list = zip(self.kpoints_coords, self.kpoints_weights, range(0,len(self.kpoints_coords)))
+                temp_list = list(zip(self.kpoints_coords, self.kpoints_weights, list(range(0,len(self.kpoints_coords)))))
                 bands_kpoints = [coords for (coords, w, index) in temp_list if w == 0]
                 indices = [index for (coords, w, index) in temp_list if w == 0]
                 if len(indices) > 0:
                     energies = self.bands_energies[:,indices[0]:indices[-1]+1]
-                    print '%i k-points used in Band Structure Calculation' %len(indices)
+                    print('%i k-points used in Band Structure Calculation starting at %ith Kpoint' %(len(indices),indices[0]+1))
                 else:
                     bands_kpoints = self.kpoints_coords
                     energies = self.bands_energies
@@ -948,7 +987,7 @@ class Cell(object):
         else: 
             energies = self.bands_energies
         
-        vbm_index = self.nb_electrons/2 - 1    
+        vbm_index = self.nb_electrons//2 - 1    
         vbm_energy = self.vbm_energy
         
         if bpp.vbm_shift is True or bpp.highlight_vbm_cbm is True:
@@ -960,76 +999,85 @@ class Cell(object):
                 vbm_energy -= vbm_energy
         else:
             shift = 0
-            
-        # positions    
-        if bpp.discontinuities:
+        # positions  
+        # Step 1: find discontinuities
+        # Step 2: remove artificial horizontal shifts induced by discontinuities
+        if bpp.discontinuities is True:
             nkpts = len(self.kpoints_coords)
             nb_seg_end = nkpts/bpp.nkpts_per_seg
             seg_extr_pos = [0]
-            positions = []
+            inds_d = [] # List of indices of discontinuities
             for i in range(1, nb_seg_end+1):
-                if i*bpp.nkpts_per_seg < nkpts and sum(self.kpoints_coords[i*bpp.nkpts_per_seg-1] - self.kpoints_coords[i*bpp.nkpts_per_seg]) == 0:
-                    seg_extr_pos.append(seg_extr_pos[i-1] + bf.distance(self.kpoints_coords[(i-1)*bpp.nkpts_per_seg], self.kpoints_coords[i*bpp.nkpts_per_seg]))
-                elif i*bpp.nkpts_per_seg == nkpts:
-                    seg_extr_pos.append(seg_extr_pos[i-1] + bf.distance(self.kpoints_coords[(i-1)*bpp.nkpts_per_seg], self.kpoints_coords[nkpts-1]))
-                else:
+                if not((i*bpp.nkpts_per_seg < nkpts and sum(self.kpoints_coords[i*bpp.nkpts_per_seg-1] - self.kpoints_coords[i*bpp.nkpts_per_seg]) == 0) or (i*bpp.nkpts_per_seg == nkpts)) :
                     # discontinuity
-                    seg_extr_pos.append(seg_extr_pos[i-1] + 
-                    bf.distance(self.kpoints_coords[(i-1)*bpp.nkpts_per_seg+1], self.kpoints_coords[i*bpp.nkpts_per_seg]))
+                    inds_d.append(i)
+            positions = copy.deepcopy(self.bands_positions)
+            for i in range(0,len(positions)):
+                for ind_d in inds_d:
+                    if i >= ind_d*bpp.nkpts_per_seg:
+                        positions[i] += self.bands_positions[ind_d*bpp.nkpts_per_seg-1] - self.bands_positions[ind_d*bpp.nkpts_per_seg] #bf.distance(self.kpoints_coords[ind_d*bpp.nkpts_per_seg-1],self.kpoints_coords[ind_d*bpp.nkpts_per_seg])
             for i in range(1, nb_seg_end+1):
                 for energy in energies[:,(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg]:
-                    if seg_extr_pos[i-1] < seg_extr_pos[i]:
-                        seg_pos = np.arange(seg_extr_pos[i-1], seg_extr_pos[i], (seg_extr_pos[i]-seg_extr_pos[i-1])/bpp.nkpts_per_seg)
-                        
-                        
-                        if len(seg_pos) == len(energy):
-                            ax.plot(seg_pos, energy, lw=3, c='k')
-                        positions = positions + list(seg_pos)
-            positions = np.array(positions)
+                    ax.plot(positions[(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], energy, lw=bpp.lw, c='k')
+            if bpp.highlight_vbm_cbm is True:
+                # plot CBM and VBM
+                for i in range(1, nb_seg_end+1):
+                    ax.plot(positions[(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], energies[vbm_index,(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], color='red', label='VBM', lw=4)
+                    ax.plot(positions[(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], energies[vbm_index+1,(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], color='blue', label='CBM', lw=4)
+            bpp.xmin = min(positions)
             bpp.xmax = max(positions)
         else:
             if self.functional in ['HSE', 'PBE0', 'Hybrid']:
                 x_values_temp = [bf.distance(f, g) for f, g in zip(bands_kpoints[:-1], bands_kpoints[1:])]
                 positions = np.cumsum([0] + x_values_temp)
-                if self.ispin == 2:
-                    positions = np.append(positions, positions)
             else:
                 positions = self.bands_positions
         
         # ---------------------------------------------------- PLOT ----------------------------------------------------
         
+        half = len(energies[0])/2
         if not bpp.discontinuities:
             if bpp.colors is True:
-                colored_bands = range(vbm_index-3, vbm_index + 4)
+                colored_bands = list(range(vbm_index-3, vbm_index + 4))
                 colors = ['green', 'goldenrod', 'orange', 'red', 'blue', 'purple', 'turquoise']
                 k = 0
                 for energy in energies:
                     k += 1
                     if k in colored_bands:
-                        ax.plot(positions, energy, c=colors[k-vbm_index+3], lw=3)
+                        if self.ispin == 2:
+                            if bpp.alpha is True:
+                                ax.plot(positions, energy[0:half], c=colors[k-vbm_index+3], lw=3)
+                            if bpp.beta is True:
+                                ax.plot(positions, energy[half:], c=colors[k-vbm_index+3], lw=3)
+                        else:
+                            ax.plot(positions, energy, c=colors[k-vbm_index+3], lw=3)
             else:
                 for energy in energies:
-                    ax.plot(positions, energy, c='k', lw=3) 
+                    if self.ispin == 2:
+                        if bpp.alpha is True:
+                            ax.plot(positions, energy[0:half], c='k', lw=3) 
+                        if bpp.beta is True:
+                            ax.plot(positions, energy[half:], c='k', lw=3) 
+                    else:
+                        ax.plot(positions, energy, c='k', lw=3) 
 
         if bpp.highlight_vbm_cbm is True:
-            if bpp.discontinuities is True:
-                for i in range(1, nb_seg_end+1):
-                    if seg_extr_pos[i-1] < seg_extr_pos[i]:
-                        seg_pos = np.arange(seg_extr_pos[i-1], seg_extr_pos[i], (seg_extr_pos[i]-seg_extr_pos[i-1])/bpp.nkpts_per_seg)
-                        
-                        ax.plot(seg_pos, energies[self.b_cbm[0],(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], color='blue', label='CBM', lw=4)
-                        ax.plot(seg_pos, energies[vbm_index,(i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], color='red', label='VBM', lw=4)
-                    else:
-                        ax.plot(positions, energies[elf.b_cbm, (i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], color = 'blue', label='CBM', lw=4)
-                        ax.plot(positions, energies[vbm_index, (i-1)*bpp.nkpts_per_seg:i*bpp.nkpts_per_seg], color = 'red', label='VBM', lw=4)
-            else:
-                ax.plot(positions, energies[vbm_index], c='red', label='VBM', lw=3)
-                ax.plot(positions, energies[vbm_index+1], c='blue', label='CBM', lw=3)
+            if bpp.discontinuities is False:
+                if self.ispin == 2:
+                    if bpp.alpha is True:
+                        ax.plot(positions, energies[vbm_index,0:half], c='red', label='VBM', lw=3)
+                        ax.plot(positions, energies[vbm_index+1,0:half], c='blue', label='CBM', lw=3) 
+                    if bpp.beta is True:
+                        ax.plot(positions, energies[vbm_index,half:], c='red', lw=3)
+                        ax.plot(positions, energies[vbm_index+1,half:], c='blue', lw=3) 
+                else:
+                    ax.plot(positions, energies[vbm_index], c='red', label='VBM', lw=3)
+                    ax.plot(positions, energies[vbm_index+1], c='blue', label='CBM', lw=3)
                 
             ax.legend()
         
         if bpp.colors is True and bpp.discontinuities is True:
-                colored_bands = range(vbm_index-3, vbm_index + 4)
+                colored_bands = list(range(vbm_index-3, vbm_index + 4))
                 colors = ['green', 'goldenrod', 'orange', 'red', 'blue', 'purple', 'turquoise']
                 for k in range(0, len(colored_bands)): 
                     for i in range(1, nb_seg_end+1):
@@ -1046,46 +1094,59 @@ class Cell(object):
 
         pf.set_ax_parameters(ax, title=bpp.title, xlabel=bpp.x_label, ylabel=bpp.y_label, xlim=[bpp.xmin, bpp.xmax], ylim=[bpp.ymin ,bpp.ymax], legend=bpp.display_legends, grid=bpp.grid,
                             fontsize=bpp.fontsize, l_fontsize=bpp.l_fontsize, xticks=bpp.xticks_var, xtick_labels=bpp.xticklabels_var, yticks=bpp.yticks_var,
-                            ytick_label=bpp.yticklabels_var, title_fontsize=bpp.title_fontsize, tight=tight, box=True)
+                            ytick_labels=bpp.yticklabels_var, title_fontsize=bpp.title_fontsize, tight=tight, box=True)
         
         if bpp.hs_kpoints_names != ['']:
             nb_hs_kpoints = len(bpp.hs_kpoints_names)
             try:
                 ax.set_xticks([f[0] for f in np.split(positions, nb_hs_kpoints-1)] + [positions[-1]])
                 ax.set_xticklabels(['$' + f + '$' for f in bpp.hs_kpoints_names])
-                for x in [f[0] for f in np.split(positions, nb_hs_kpoints-1)][1:]:
-                    ax.axvline(x, linestyle='--', lw=2, color='black')
             except ValueError:
-                print 'Warning! ' + str(len(positions)) + ' k-points, cannot be split into ' + str(nb_hs_kpoints-1) + ' segments of equal length'
+                print('Warning! ' + str(len(positions)) + ' k-points, cannot be split into ' + str(nb_hs_kpoints-1) + ' segments of equal length')
+        self.bands_positions_hybrid = positions
         return figure
     
     def fit_bands(self):
         figure = plt.figure()
         ax = figure.add_subplot(211)
-        figure = self.plot_band_diagram(ax=ax, bpp=self.bfp)
+        figure = self.plot_band_diagram(ax=ax, bpp=self.bfpp)
         
         ax1 = figure.add_subplot(223)
         ax2 = figure.add_subplot(224)
-        self.fit_band(self.bfp.bands_fit['CBM'], ax_main=ax, ax_sec=ax1)         
-        self.fit_band(self.bfp.bands_fit['VBM'], ax_main=ax, ax_sec=ax2)
-        figure.subplots_adjust(hspace=10./self.bfp.fontsize)         
+        self.fit_band(self.bfpp.bands_fit['CBM'], ax_main=ax, ax_sec=ax1)         
+        self.fit_band(self.bfpp.bands_fit['VBM'], ax_main=ax, ax_sec=ax2)
+        figure.subplots_adjust(hspace=10./self.bfpp.fontsize)      
+        plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.3)   
         
         return figure
+    
+#    def fit_bands(self):
+#        figure = plt.figure()
+#        ax = figure.add_subplot(211)
+#        figure = self.plot_band_diagram(ax=ax, bpp=self.bfpp)
+#        
+#        ax1 = figure.add_subplot(223)
+#        ax2 = figure.add_subplot(224)
+#        self.fit_band(self.bfpp.bands_fit['CBM'], ax_main=ax, ax_sec=ax1)         
+#        self.fit_band(self.bfpp.bands_fit['VBM'], ax_main=ax, ax_sec=ax2)
+#        figure.subplots_adjust(hspace=10./self.bfpp.fontsize)         
+#        
+#        return figure
 
     def fit_band(self, bfp, ax_main=None, ax_sec=None):
 
         ax, figure = pf.auto_ax(ax_main)
         
         if bfp.xfitmin is not None and bfp.xfitmax is not None:
-            print '\n\nStarting fitting ' + bfp.band_fit + ' between ' + str(bfp.xfitmin) + ' and ' + str(bfp.xfitmax) + '...'
+            print('\n\nStarting fitting ' + bfp.band_fit + ' between ' + str(bfp.xfitmin) + ' and ' + str(bfp.xfitmax) + '...')
             fit_region = [p for p in self.bands_positions if p >= bfp.xfitmin and p<=bfp.xfitmax ]
             fit_region_indices = [list(self.bands_positions).index(p) for p in fit_region]
-            print str(len(fit_region)) + ' K-points detected in fitting region'
+            print(str(len(fit_region)) + ' K-points detected in fitting region')
             
             if len(fit_region)<5:
                 message = 'Warning! The fitting region includes only ' + str(len(fit_region)) 
                 message += ' K-points, you may want to enlarge it, or provide a calculation with a denser K-mesh'
-                print message
+                print(message)
 
             if bfp.band_fit == 'CBM':
                 band_energy = self.cb_energy
@@ -1093,7 +1154,7 @@ class Cell(object):
                 band_energy = self.vb_energy
             
             en_to_fit = band_energy[fit_region_indices]  
-            ymiddle = en_to_fit[len(fit_region)/2]
+            ymiddle = en_to_fit[len(fit_region)//2]
             if ymiddle > en_to_fit[0]: # convex
                 y_extr = max(en_to_fit)
             else:
@@ -1102,28 +1163,28 @@ class Cell(object):
             length = len(fit_region)
             x_extr = fit_region[list(en_to_fit).index(y_extr)]
             
-            print 'Parabol summit located in %.3f %.3f' % (x_extr, y_extr)
+            print('Parabol summit located in %.3f %.3f' % (x_extr, y_extr))
             self.steps = 0
             if ymiddle > en_to_fit[0]:
-                print 'Fitting E = %.3f-(x-%.3f)**2/(2*m) by changing effective mass m...\n' % (y_extr, x_extr)
+                print('Fitting E = %.3f-(x-%.3f)**2/(2*m) by changing effective mass m...\n' % (y_extr, x_extr))
                 def parabol(x, m):
                     self.steps += 1
                     return y_extr-(x-x_extr)**2/(2*m)
             else:
-                print 'Fitting E = %.3f+(x-%.3f)**2/(2*m) by changing effective mass m...\n' % (y_extr, x_extr)
+                print('Fitting E = %.3f+(x-%.3f)**2/(2*m) by changing effective mass m...\n' % (y_extr, x_extr))
                 def parabol(x, m):
                     self.steps += 1
                     return y_extr+(x-x_extr)**2/(2*m)
 
             popt, pcov = sco.curve_fit(parabol, fit_region, en_to_fit)
             
-            print 'Convergence reached in ' + str(self.steps) + ' steps'
-            print 'Standard deviation: ' + str(float(np.sqrt(np.diag(pcov)))) + ' eV'
+            print('Convergence reached in ' + str(self.steps) + ' steps')
+            print('Standard deviation: ' + str(float(np.sqrt(np.diag(pcov)))) + ' eV')
             
             if bfp.band_fit == 'VBM':
-                print '\n\nEffective mass of electrons in Valence Band is %.4f me' %float(popt)
+                print('\n\nEffective mass of electrons in Valence Band is %.4f me' %float(popt))
             else:
-                print '\n\nEffective mass of electrons in Conduction Band is %.4f me' %float(popt)
+                print('\n\nEffective mass of electrons in Conduction Band is %.4f me' %float(popt))
                 
             if bfp.band_fit == 'VBM':
                 color = 'red'
@@ -1139,7 +1200,7 @@ class Cell(object):
 
             pf.set_ax_parameters(ax, title=bfp.pp.title, xlabel=bfp.pp.x_label, ylabel=bfp.pp.y_label, xlim=[bfp.pp.xmin, bfp.pp.xmax], ylim=[bfp.pp.ymin ,bfp.pp.ymax], legend=bfp.pp.display_legends, grid=bfp.pp.grid,
                                 fontsize=bfp.pp.fontsize, l_fontsize=bfp.pp.l_fontsize, xticks=bfp.pp.xticks_var, xtick_labels=bfp.pp.xticklabels_var, yticks=bfp.pp.yticks_var,
-                                ytick_label=bfp.pp.yticklabels_var, title_fontsize=bfp.pp.title_fontsize)
+                                ytick_labels=bfp.pp.yticklabels_var, title_fontsize=bfp.pp.title_fontsize)
                                 
             x = np.arange(min(fit_region), max(fit_region), (max(fit_region) - min(fit_region))/500.)
             ax_sec.plot(x, parabol(x, *popt), label='fit ' + bfp.band_fit, color='black')
@@ -1150,7 +1211,32 @@ class Cell(object):
             
             return figure
         else:
-            print 'Warning! No range for ' + bfp.band_fit + ' fit specified!'
+            print('Warning! No range for ' + bfp.band_fit + ' fit specified!')
+            
+    def plot_kpts_mesh(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(self.kpoints_coords[:,0], self.kpoints_coords[:,1], self.kpoints_coords[:,2], c='black')
+        ax.set_title(r'$' + self.display_rname + '$ K-points path in reciprocal space', fontsize=24)
+        ax.set_xlabel('x*')
+        ax.set_ylabel('y*')
+        ax.set_zlabel('z*')
+        return fig
+    
+    def plot_fermi_surface(self, tolerance):
+        # Filter kpoints by energy
+        kpts_number_list = []
+        for nk in range(0,self.nkpts):
+            u = (self.band_energies[:,nk] - self.fermi_energy)
+            if min(u*u) < tolerance:
+                kpts_number_list.aappend(nk)
+        kpts_number_list.sort()
+        # plot
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(self.kpoints_coords[kpts_number_list,0], self.kpoints_coords[kpts_number_list,1], self.kpoints_coords[kpts_number_list,2], c='black')
+        
+        return figure
 
 
 def get_functional(outcar):
@@ -1219,16 +1305,24 @@ def get_system_name(atoms_types, nb_atoms, reduced):
 
     name = ''
     name_display = ''  # name for display in matplotlib
-
-    atoms_list = zip(nb_atoms, atoms_types)
+    
+    # sort by increasing stoechiometric number 
+    # for every species having the same stoechiometric number, sort by lexicographic order
+    atoms_list = list(zip(nb_atoms, atoms_types))
     atoms_list.sort(key=lambda x: x[0])
-    for f, g in atoms_list:
-        if f != 1:
-            name += g + str(f)
-            name_display += g + '_{' + str(f) + '}'
+    stoechs = set([x[0] for x in atoms_list])
+    atoms_list_pre_sorted = [([x[1] for x in atoms_list if x[0]==s],s) for s in stoechs]
+    for alist, s in atoms_list_pre_sorted:
+        alist.sort()
+    for alist, stoech in atoms_list_pre_sorted:
+        if stoech != 1:
+            for species in alist:
+                name += species + str(stoech)
+                name_display += species + '_{' + str(stoech) + '}'
         else:
-            name += g
-            name_display += g
+            for species in alist:
+                name += species
+                name_display += species
 
     return name, name_display
 
@@ -1248,13 +1342,13 @@ def get_atoms_positions(outcar, atoms):
 
     str_beg = 'position of ions in cartesian coordinates  (Angst):'
     index_beg = bf.grep(outcar, str_beg, nb_found=1)[0][1] + 1  # index of the first atom position
-    index_end = len(atoms) 
+    index_end = len(atoms)
     atoms_positions = np.transpose(bf.fast_stringcolumn_to_array(outcar[index_beg: index_end+index_beg]))
     # Check that the number of positions retrieved is equal to the number of atoms
     if len(atoms_positions) != len(atoms):
         raise bf.PyDEFImportError("The number of atoms positions is not consistent with the total number of atoms")
     else:
-        return dict(zip(atoms, atoms_positions))
+        return dict(list(zip(atoms, atoms_positions)))
 
 
 def get_band_occupation(outcar, nkpts, functional):
@@ -1262,7 +1356,11 @@ def get_band_occupation(outcar, nkpts, functional):
     :param outcar: content of the outcar file (list of strings)
     :param nkpts: number of kpoints (int)
     :param functional: functional used (string)
-    :return: last energy and occupation of the bands for each kpoint """
+    :return: last energy and occupation of the bands for each kpoint 
+    Format of the output: 3D-array with
+     1st index = k-pt number
+     2nd index = 0 (Energies) or 1 (Occupancies)
+     3rd index = band number"""
 
     if functional == 'GW0@GGA':
         str_beg = "  band No. old QP-enery  QP-energies   sigma(KS)   T+V_ion+V_H  V^pw_x(r,r')   Z            occupation"
@@ -1296,7 +1394,7 @@ def get_electrostatic_potentials(outcar, atoms):
     index_beg = bf.grep(outcar, 'average (electrostatic) potential at core', nb_found=1)[0][1] + 3
     try:
         index_end = outcar[index_beg:].index(' ')
-    except ValueError,e :
+    except ValueError as e :
         index_end = outcar[index_beg:].index('')
 
     potentials_str = outcar[index_beg: index_beg + index_end]
@@ -1306,7 +1404,7 @@ def get_electrostatic_potentials(outcar, atoms):
     if len(potentials) != len(atoms):
         raise bf.PyDEFImportError('Number of electrostatic potentials retrieved and number are not consistent')
 
-    return dict(zip(list(atoms), potentials))
+    return dict(list(zip(list(atoms), potentials)))
 
 
 def get_kpoints_weights_and_coords(outcar, nkpts, rec=False):
@@ -1331,6 +1429,12 @@ def get_kpoints_weights_and_coords(outcar, nkpts, rec=False):
         raise bf.PyDEFImportError('Number of kpoint weights retrieved and number of kpoints are not consistent')
     else:
         return coordinates, weights
+        
+def get_forces(outcar):
+    nions = int(bf.grep(outcar, 'NIONS')[0][0].split()[-1])
+    lnb = bf.grep(outcar,'TOTAL-FORCE (eV/Angst)')[-1][1] 
+    pos_forces = np.array([[float(x) for x in [x for x in line.split()]] for line in outcar[lnb+2:lnb+nions+2]])
+    return pos_forces
 
 
 class DosPlotParameters(pf.PlotParameters):
@@ -1378,6 +1482,8 @@ class DosPlotParameters(pf.PlotParameters):
         self.normalize = False
         self.smooth = False # if True, DoS smoothing using moving average of self.n_smooth order
         self.n_smooth = 100
+        self.flip = False # If True, flip xy so that bands + dos can be joined
+
 
         # Figure and axis parameters
         self.title = cell.title  # Title of the plot
@@ -1385,7 +1491,7 @@ class DosPlotParameters(pf.PlotParameters):
         if self.fermi_shift:
             self.x_label = '$E - E_F$ (eV)'
         else:
-            print 'No Fermi level retrieved'
+            print('No Fermi level retrieved')
             self.x_label = '$E$ (eV)'
         self.y_label = 'DoS (states/eV)'
         self.energy_range = np.sort([cell.emin, cell.emax])
@@ -1425,6 +1531,8 @@ class BandDiagramPlotParameters(pf.PlotParameters):
         self.discontinuities = False
         self.nkpts_per_seg = 0 # for discontinuities
         self.nkpts_hybrid_bands = 0
+        self.alpha = True
+        self.beta = True
         
 
 class BandFitPlotParameters(BandDiagramPlotParameters):

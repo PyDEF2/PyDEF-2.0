@@ -1,0 +1,5 @@
+mu_S=-0.25mu_Cd-0.5mu_In-6.639
+mu_In>=-5.044-0.5mu_Cd (Competition with S)
+mu_In>=-1.123+1.5mu_Cd (Competition with CdS)
+mu_In<=-0.654+1.5mu_Cd (Competition with In_{2}S_{3})
+mu_In<=-2.072+0.5mu_Cd (Competition with InS)

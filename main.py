@@ -1,25 +1,28 @@
 """
     Main PyDEF window
-    version: 2.0
+    version: 2.1
     author: Adrien Stoliaroff
     email: adrien.stoliaroff@cnrs-imn.fr
 """
 
-import cPickle as pickle
+
+
+
+import pickle
 import numpy as np
+import random
 
 # GUI imports
-import Tkinter as tk
-from Tkinter import Tk, Frame, Menu, Button, Label
-from Tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, DISABLED, NORMAL, VERTICAL
-import tkFileDialog as fd
-import FileDialog # needed for cx_freeze compilation
+import tkinter as tk
+from tkinter import Tk, Frame, Menu, Button, Label
+from tkinter import LEFT, RIGHT, TOP, BOTTOM, X, FLAT, RAISED, BOTH, END, DISABLED, NORMAL, VERTICAL
+import tkinter.filedialog as fd
+import tkinter.filedialog # needed for cx_freeze compilation
 from PIL import Image, ImageTk
-import ttk
 import sys, traceback
-import ttk
-from Tkinter import Canvas
-import tkMessageBox as mb
+import tkinter.ttk
+from tkinter import Canvas
+import tkinter.messagebox as mb
 
 # Matplotlib for POC
 import matplotlib
@@ -55,13 +58,14 @@ import sys
 class Main_Window(tk.Tk):
 
     def todo(self):
-            print 'Warning! Sorry, this feature has not been developped yet'
+            print('Warning! Sorry, this feature has not been developped yet')
 
     def __init__(self, dev=False):
         tk.Tk.__init__(self, className='PyDEF')
         self.geometry("{0}x{1}+0+0".format(self.winfo_screenwidth()-15, self.winfo_screenheight()))
-        self.wm_minsize(width = self.winfo_screenwidth()/2, height = self.winfo_screenwidth()/2)
-        self.title('PyDEF 2.0')
+        self.wm_minsize(width = self.winfo_screenwidth()//2, height = self.winfo_screenwidth()//2)
+        self.title('PyDEF 2.1')
+        print(sys.platform)
         platform = sys.platform
         if platform == 'win32' :
             self.state("zoomed")
@@ -85,7 +89,7 @@ class Main_Window(tk.Tk):
 
         self.projects_mem = self.load_mem()
         self.projects = {}
-        for pid in self.projects_mem.keys():
+        for pid in list(self.projects_mem.keys()):
             if pid not in ['last_import_dir', 'last_export_dir']:
                 name = self.projects_mem[pid]['name']
                 path = self.projects_mem[pid]['path']
@@ -97,7 +101,7 @@ class Main_Window(tk.Tk):
         except KeyError:
             pass
 
-        if len(self.projects.keys()) > 0:
+        if len(list(self.projects.keys())) > 0:
             self.currentprojectid = list(self.projects.keys())[0]
         else:
             self.currentprojectid = ''
@@ -125,48 +129,49 @@ class Main_Window(tk.Tk):
 
         self.toolbar  =  tk.Frame(self.master, bd = 1, relief = RAISED)
 
-        self.newicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/new.png'))
+        self.newicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/new.png').resize((30,30)))
 
         self.createButton = Button(self.toolbar, text='New', image=self.newicon, compound=TOP, command=self.new)
         self.createButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.img2 = Image.open('Pictures/Toolbar/import.png')
+        self.img2 = Image.open('Pictures/Toolbar/import.png').resize((30,30))
         self.useImg2 = ImageTk.PhotoImage(self.img2)
 
         importButton = Button(self.toolbar, text='Import', image=self.useImg2, compound=TOP, command=self.importcalc)
         importButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.exporticon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/export.png'))
+        self.exporticon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/export.png').resize((30,30)))
 
         exportButton = Button(self.toolbar, text='Export', image=self.exporticon, compound=TOP, command=self.export)
         exportButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.saveicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/save.png'))
+        self.saveicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/save.png').resize((30,30)))
 
         saveButton = Button(self.toolbar, text='Save', image=self.saveicon, compound=TOP, command=self.save)
         saveButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.binicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/bin.png'))
+        self.binicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/bin.png').resize((30,30)))
 
         deleteButton = Button(self.toolbar, text='Delete', image=self.binicon, compound=TOP, command=self.delete)
         deleteButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.ploticon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/plot2.png'))
+        self.ploticon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/plot2.png').resize((30,30)))
 
         plotButton = Button(self.toolbar, text='Plot', image=self.ploticon, compound=TOP, command=self.plot)
         plotButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.closeicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/delete.png'))
+        self.closeicon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/delete.png').resize((30,30)))
 
         closeButton = Button(self.toolbar, text='Close', image=self.closeicon, compound=TOP, command=self.close_current_viewed_pane)
         closeButton.pack(side=LEFT, padx=2, pady=2)
 
-        self.exiticon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/exit.png'))
+        self.exiticon = ImageTk.PhotoImage(Image.open('Pictures/Toolbar/exit.png').resize((30,30)))
 
         exitButton = Button(self.toolbar, text='Exit', image=self.exiticon, compound=TOP, command=self.exit_pydef)
         exitButton.pack(side=LEFT, padx=2, pady=2)
 
-        if self.dev is True:
+
+        if self.dev:
             checkButton = Button(self.toolbar, text='Check', command=self.check)
             checkButton.pack(side=LEFT, padx=2, pady=2)
 
@@ -192,11 +197,11 @@ class Main_Window(tk.Tk):
 
         # -------------------------------------------- REST OF THE WINDOW  ----------------------------------------------
 
-        self.container = tk.PanedWindow(self.master, bd = 2, bg = 'white', relief = RAISED, showhandle=True)
+        self.container = tk.PanedWindow(self.master, bd = 2, bg = 'white', relief = RAISED, showhandle=False,sashrelief='raised',sashpad=3)
 
         # PROJECT MANAGEMENT
         self.project_management_panel = tk.Frame(self.container, bd = 2, bg = 'white', relief = RAISED)
-        self.project_notebook = ttk.Notebook(master=self.project_management_panel)
+        self.project_notebook = tkinter.ttk.Notebook(master=self.project_management_panel)
         self.pm_pane = tk.Frame(self.project_notebook, bg = 'white', relief = RAISED)
         self.pm = pm.ProjectsManager(self.pm_pane, self)
         treescrollb = tk.Scrollbar(self.pm_pane, command=self.pm.tree.yview)
@@ -211,11 +216,11 @@ class Main_Window(tk.Tk):
         fmtreescrollb.pack(side='left', fill='y')
         self.fm.tree.pack(side='right', fill='both', expand=True)
 
-        self.project_notebook.add(self.pm_pane, text='Projects')
+        self.project_notebook.add(self.pm_pane, text='Projects Manager')
         self.project_notebook.add(self.fm_pane, text='Figures')
         self.project_notebook.pack(fill='both', expand=True)
 
-        self.work_container = tk.PanedWindow(self.container, bd = 2, bg = 'white', relief = RAISED, showhandle=True, orient=VERTICAL)
+        self.work_container = tk.PanedWindow(self.container, bd = 2, bg = 'white', relief = RAISED, showhandle=False, orient=VERTICAL,sashrelief='raised',sashpad=3)
         # WORK FRAME
         self.work_frame = tu.CustomNotebook(master=self.work_container)
 
@@ -230,7 +235,7 @@ class Main_Window(tk.Tk):
         self.background.pack(side=TOP, fill= BOTH, expand=True)
 
         self.welcome_pane = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
-        welcomtext='Welcome to PyDEF 2.0!'
+        welcomtext='Welcome to PyDEF 2.1!'
         tutotext='To start working, please import a calculation using the toolbar button.\n\n'
         tutotext += 'If successfully imported, the calculation appears in the Project Manager on the left of the screen\n'
         tutotext += 'and you are notified in the consol at the bottom of the screen.\n'
@@ -250,7 +255,7 @@ class Main_Window(tk.Tk):
         # Consol
         self.consol = tk.Frame(self.work_container, bd = 2, bg = 'white', relief = RAISED)
         self.consolText = tk.Text(self.consol, relief = FLAT)
-        self.consolText.insert(END, 'Welcome to PyDEF 2.0\n')
+        self.consolText.insert(END, 'Welcome to PyDEF 2.1\n')
         self.consolText.config(font=("consolas", 12), wrap='word')
         self.consolText.grid(row = 0, column = 0, sticky = 'nsew')
 
@@ -279,11 +284,12 @@ class Main_Window(tk.Tk):
         self.container.pack(side=TOP, fill=BOTH, expand=True)
 
         self.init = True
-
+        
+    
     def check(self):
         # For Development only
-        print 'mem %s' %self.projects_mem.keys()
-        self.pm.check_tree()
+        print('check')
+        print(self.projects)
 
     def delete(self):
         self.pm.delete()
@@ -298,7 +304,7 @@ class Main_Window(tk.Tk):
             self.destroy()
         else:
             return None
-    
+
     def export(self):
         project = self.projects[self.currentprojectid]
         def get_filename():
@@ -328,7 +334,7 @@ class Main_Window(tk.Tk):
                     except AttributeError:
                         message = 'Warning! No optical indices in ' + project.cells[self.currentitemid].treetitle
                         message += ' yet. Plot optical indices and retry please.'
-                        print message
+                        print(message)
                 elif choice.get() == 'D':
                     project.cells[self.currentitemid].gc.export_atom_displacements(filename, separator)
                 elif choice.get() == 'A-A D':
@@ -356,7 +362,7 @@ class Main_Window(tk.Tk):
 
     def printerror(self, message):
         self.consolText.config(state=NORMAL)
-        self.consolText.insert(END, '\n!!!Error!!! %s \n' %message, 'err')
+        self.consolText.insert(END, '\n!!!Error!!! %s \a \n' %message, 'err')
         self.consolText.see(END)
         self.consolText.config(state=DISABLED)
         if self.dev:
@@ -380,18 +386,18 @@ class Main_Window(tk.Tk):
                         doscarpath = filenames[0]
                     try:
                         self.projects[self.currentprojectid].add_cell(cc.Cell(outcarpath, doscarpath))
-                    except AssertionError, e:
+                    except AssertionError as e:
                         self.printerror(str(e))
-                    except Exception, e:
+                    except Exception as e:
                         self.printerror(str(e))
                 else:
                     try:
                         outcarpath = filenames[0]
                         self.projects[self.currentprojectid].add_cell(cc.Cell(outcarpath, ''))
-                    except Exception, e:
+                    except Exception as e:
                         self.printerror(str(e))
                 self.last_import_dir = '/'.join(outcarpath.split('/')[0:-1])
-        except KeyError, e:
+        except KeyError as e:
             self.printerror('Please select a project before importing calculations!')
 
 
@@ -409,7 +415,7 @@ class Main_Window(tk.Tk):
             self.new_cascade.add_command(label="Material Study", compound=LEFT, command=self.new_material_study, image=self.mat_stud_icon)
             self.new_cascade.add_command(label="Mutltiple subplots figure", compound=LEFT, command=self.new_multiple_subplot_figure, image=self.mfig_icon)
             self.new_cascade.post(self.createButton.winfo_rootx(), self.createButton.winfo_rooty() + self.createButton.winfo_height())
-        except bf.pydefDefectCreationError, e:
+        except bf.PyDEFDefectCreationError as e:
             self.printerror(str(e))
         # Close contextual menu when mouse leaves menu
         def popupFocusOut(event=None):
@@ -427,13 +433,13 @@ class Main_Window(tk.Tk):
         self.projects_mem[new_id] = {'path':None, 'name': new_proj.name}
         self.pm.new_project(new_proj)
         self.fm.new_project(new_proj)
-        print 'New Project created successfully'
-
+        print('New Project created successfully')
+    
     def new_chemical_potentials(self):
         try:
             cpw.ChemicalPotentialsCreationWindow(self, self.projects[self.currentprojectid], None)
         except KeyError:
-            if self.currentprojectid not in self.projects.keys():
+            if self.currentprojectid not in list(self.projects.keys()):
                 self.printerror('No Project! Please create a Project first')
             else:
                 self.printerror('No host cell! Please declare a host cell first')
@@ -441,7 +447,7 @@ class Main_Window(tk.Tk):
     def new_defect_study(self):
         try:
             dscw.DefectStudyCreationWindow(self, self.projects[self.currentprojectid], None)
-        except bf.pydefDefectCreationError, e:
+        except bf.PyDEFDefectCreationError as e:
             self.printerror(str(e))
         except KeyError:
             self.printerror('No Project! Please create a Project first')
@@ -449,7 +455,7 @@ class Main_Window(tk.Tk):
     def new_material_study(self):
         try:
             msw.MaterialStudyCreationWindow(self, self.projects[self.currentprojectid], None)
-        except bf.pydefDefectCreationError, e:
+        except bf.PyDEFDefectCreationError as e:
             self.printerror(str(e))
         except KeyError:
             self.printerror('No Project! Please create a Project first')
@@ -479,35 +485,35 @@ class Main_Window(tk.Tk):
         if project.object_str_type(self.currentitemid) == 'cell':
             cell =  project.cells[self.currentitemid]
             panetitle = cell.treetitle
-            print 'Plot DoS of cell ' + panetitle
+            print('Plot DoS of cell ' + panetitle)
             # project.cells[self.currentitemid]
             try:
                 fig = cell.plot_dos(dpp=cell.lastdpp)
-            except AttributeError, e:
+            except AttributeError as e:
                 self.printerror('Impossible to plot DoS as no DOSCAR provided for this calculation!')
         elif project.object_str_type(self.currentitemid) == 'chem-pot':
             fig = project.chemical_potentials.plot_stability_domain(None, project.chemical_potentials.lastppp)
-            listname = [ppp.name for ppp in project.pp['ppp'].values()]
+            listname = [ppp.name for ppp in list(project.pp['ppp'].values())]
             if project.chemical_potentials.lastppp.name not in listname:
                 project.pp['ppp'][project.chemical_potentials.lastppp.name] = project.chemical_potentials.lastppp
             panetitle = project.chemical_potentials.synthesized.rname
-            print 'Plot ' + panetitle + ' Stability Domain'
+            print('Plot ' + panetitle + ' Stability Domain')
         elif project.object_str_type(self.currentitemid) == 'defect-study':
             is_embedded, containerID, removeID = project.is_embedded(self.currentitemid)
             if not is_embedded:
                 defect_study = project.defect_studies[self.currentitemid]
                 panetitle = defect_study.treetitle
-                print 'Plot Defect Formation Energy of Defect Study ' + panetitle
+                print('Plot Defect Formation Energy of Defect Study ' + panetitle)
                 fig = defect_study.plot_formation_energy()
             else:
                 defect_study = project.material_studies[containerID].defect_studies[self.currentitemid]
                 panetitle = defect_study.treetitle
-                print 'Plot Defect Formation Energy of Defect Study ' + panetitle
+                print('Plot Defect Formation Energy of Defect Study ' + panetitle)
                 fig = defect_study.plot_formation_energy()
         elif project.object_str_type(self.currentitemid) == 'material-study':
             material_study = project.material_studies[self.currentitemid]
             panetitle = material_study.treetitle
-            print 'Plot Defect Formation Energies of Material Study ' + panetitle
+            print('Plot Defect Formation Energies of Material Study ' + panetitle)
             fig = material_study.plot_formation_energy(fpp=material_study.lastfpp)
 
         if fig is not None:
@@ -523,9 +529,9 @@ class Main_Window(tk.Tk):
                 frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
                 figframe = self.fig_to_canvas(fig, frame)
                 self.update_work_frame(frame, mfigure.name)
-        except AttributeError, e:
+        except AttributeError as e:
             self.printerror(str(e))
-        except ValueError, e:
+        except ValueError as e:
             self.printerror(str(e))
 
     def plot_optical_indices(self, opp=None):
@@ -535,13 +541,13 @@ class Main_Window(tk.Tk):
             # check if cell already has OpticalIndices attribute
             try:
                 len(cell.optical_indices.components)
-            except AttributeError, e:
+            except AttributeError as e:
                 if bf.grep(cell.outcar, "DIELECTRIC FUNCTION") is not None or bf.grep(cell.outcar, "DIELECTRIC TENSOR") is not None:
                     cell.optical_indices = oi.OpticalIndices(cell.outcar)
                 else:
                     message = 'Warning! There is no dielectric function to plot in this file! '
                     message += '\nSee https://cms.mpi.univie.ac.at/wiki/index.php/Dielectric_properties_of_SiC for VASP help'
-                    print message
+                    print(message)
                     return None
             if opp is None:
                 fig = cell.optical_indices.plot(pp=cell.optical_indices.lastopp)
@@ -555,6 +561,8 @@ class Main_Window(tk.Tk):
         project = self.projects[self.currentprojectid]
         if project.object_str_type(self.currentitemid) == 'cell':
             cell = project.cells[self.currentitemid]
+            panetitle = cell.treetitle
+            print("Plot Band Diagram of cell "+panetitle)
             fig = cell.plot_band_diagram(bpp=cell.lastbpp)
             frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
             self.fig_to_canvas(fig, frame)
@@ -575,17 +583,17 @@ class Main_Window(tk.Tk):
             if not is_embedded:
                 def_study = self.projects[self.currentprojectid].defect_studies[self.currentitemid]
                 panetitle = def_study.treetitle
-                print 'Plot Defect Transition Levels of Defect Study ' + panetitle
+                print('Plot Defect Transition Levels of Defect Study ' + panetitle)
                 fig = def_study.plot_transition_levels(tpp=def_study.lasttpp)
             else:
                 def_study = self.projects[self.currentprojectid].material_studies[containerID].defect_studies[self.currentitemid]
                 panetitle = def_study.treetitle
-                print 'Plot Defect Transition Levels of Defect Study ' + panetitle
+                print('Plot Defect Transition Levels of Defect Study ' + panetitle)
                 fig = def_study.plot_transition_levels(tpp=def_study.lasttpp)
         elif self.projects[self.currentprojectid].object_str_type(self.currentitemid) == 'material-study':
             material_study = self.projects[self.currentprojectid].material_studies[self.currentitemid]
             panetitle = material_study.treetitle
-            print 'Plot Defect Transition Levels of Defect Study ' + panetitle
+            print('Plot Defect Transition Levels of Defect Study ' + panetitle)
             fig = material_study.plot_transition_levels(tpp=material_study.lasttpp)
         frame = tk.Frame(self.work_frame, bd = 2, bg = 'white', relief = RAISED)
 
@@ -601,7 +609,7 @@ class Main_Window(tk.Tk):
                     defe = defstud.dcs[0].defects[0]
                 try:
                     material_study.defect_concentrations = ds.ConcentrationsCalculation(material_study)
-                except bf.PyDEFInputError, e:
+                except bf.PyDEFInputError as e:
                     self.printerror(str(e))
                 try:
                     if code == 0:
@@ -614,11 +622,11 @@ class Main_Window(tk.Tk):
                     self.fig_to_canvas(fig, frame)
                     panetitle = material_study.treetitle + ' dc'
                     self.update_work_frame(frame, panetitle)
-                except bf.PyDEFSolveError, e:
+                except bf.PyDEFSolveError as e:
                     self.printerror(str(e))
-                except TypeError, e:
+                except TypeError as e:
                    self.printerror('Unknown number of sites for the defects! Please specify the number of sites for each defect')
-                except AttributeError, e:
+                except AttributeError as e:
                     message = 'Please specify a DOSCAR file for each calculation in Material Study ' + material_study.treetitle
                     message += ' as it is mandatory for Concentrations Calculations'
                     self.printerror(message)
@@ -638,7 +646,7 @@ class Main_Window(tk.Tk):
                         inv = event.inaxes.transAxes.inverted()
                         self.mem.set_bbox_to_anchor(inv.transform((event.x,event.y)))
                         canvas.draw()
-                    except AttributeError, e:
+                    except AttributeError as e:
                         pass
                     except TypeError:
                         pass
@@ -706,36 +714,33 @@ class Main_Window(tk.Tk):
         try:
             projectpath = self.projects_mem[pid]['path']
             if projectpath.split('.')[-1] != 'pyd':
-                print 'Warning! Are you sure this project was saved correctly? The file\'s extension is not *.pyd.'
+                print('Warning! Are you sure this project was saved correctly? The file\'s extension is not *.pyd.')
             with open(projectpath, "rb") as f:
-                self.projects[pid] = pickle.load(f)
+                self.projects[pid] = pickle.load(f,encoding="bytes")
                 self.projects[pid].mainwindow = self
                 self.projects[pid].pid = pid
-            print 'Project ' + self.projects[pid].name + ' loaded successfully!\n'
+            print('Project ' + self.projects[pid].name + ' loaded successfully!\n')
         except IOError:
-            print 'No *.pyd file found for Project %s!' %pid
-            print self.projects.keys()
-            if pid in self.projects_mem.keys():
+            print('No *.pyd file found for Project ' + pid + '! Project deleted.')
+            if pid in list(self.projects_mem.keys()):
                 self.projects_mem.pop(pid)
-                print 'Project %s deleted.' %pid
-            self.projects.keys()
         except KeyError:
             self.printerror('Sorry! I do not remember any path to a *.pyd save file for this project.')
         except EOFError:
             if self.init:
                 self.printerror('Error while reading saved *.pyd file.')
             else:
-                print '!!!Error!!! Error while reading saved *.pyd file.'
+                print('!!!Error!!! Error while reading saved *.pyd file.\a')
 
 
     def save_project(self, project):
-        if project.pid in self.projects_mem.keys() and self.projects_mem[project.pid]['path'] is not None:
+        if project.pid in list(self.projects_mem.keys()) and self.projects_mem[project.pid]['path'] is not None:
             projectpath = self.projects_mem[project.pid]['path']
         else:
-           projectpath = "./Save-Projects/" + project.name.replace(' ', '_') + "_" + str(np.random.randint(0, sys.maxint)) + ".pyd"
+           projectpath = "./Save-Projects/" + project.name.replace(' ', '_') + "_" + str(random.randint(0, sys.maxsize)) + ".pyd"
            # The random integer here is to ensure unicity of the path in case users want to exchange *.pyd files
-        if len(project.mfigures.values()) > 0:
-            for mfig in project.mfigures.values():
+        if len(list(project.mfigures.values())) > 0:
+            for mfig in list(project.mfigures.values()):
                 mfig.figure = None
         with open(projectpath, "wb") as f:
             project.mainwindow = None
@@ -749,23 +754,23 @@ class Main_Window(tk.Tk):
     def load_mem(self):
         try:
             with open("./Save-Projects/PyDEF_memory.pyd", "rb") as f:
-                return pickle.load(f)
-        except EOFError, e :
-            print 'Warning! PyDEF memory file found but is empty. '
+                return pickle.load(f,encoding="bytes")
+        except EOFError as e :
+            print('Warning! PyDEF memory file found but is empty. ')
             return {}
-        except IOError, e:
-            print 'Warning! No PyDEF memory found. '
+        except IOError as e:
+            print('Warning! No PyDEF memory found. ')
             return {}
 
 
     def save(self, save_all_projects=False):
         if save_all_projects:
-            for project in self.projects.values():
+            for project in list(self.projects.values()):
                 self.save_project(project)
-            print 'All %i projects saved successfully!' %len(self.projects.keys())
+            print('All %i projects saved successfully!' %len(list(self.projects.keys())))
         else:
             self.save_project(self.projects[self.currentprojectid])
-            print 'Project ' + self.projects[self.currentprojectid].name + ' saved successfully!'
+            print('Project ' + self.projects[self.currentprojectid].name + ' saved successfully!')
         with open("./Save-Projects/PyDEF_memory.pyd", "wb") as f:
             pickle.dump(self.projects_mem, f, pickle.HIGHEST_PROTOCOL)
 
@@ -774,10 +779,10 @@ class Main_Window(tk.Tk):
         try:
             path = fd.askopenfilenames(parent=self, initialdir=self.last_import_dir,title="Import *.pyd file")[0]
             if path.split('.')[-1] != 'pyd':
-                print 'Warning! Are you sure this project was saved correctly? The file\'s extension is not *.pyd.'
+                print('Warning! Are you sure this project was saved correctly? The file\'s extension is not *.pyd.')
             pid = self.new_project_key()
             with open(path, "rb") as f:
-                self.projects[pid] = pickle.load(f)
+                self.projects[pid] = pickle.load(f,encoding="bytes")
                 self.projects[pid].mainwindow = self
                 self.projects_mem[pid] = {'name': self.projects[pid].name, 'path': path}
                 self.load_project(pid)
@@ -795,10 +800,10 @@ class Main_Window(tk.Tk):
         AboutPyDEF(self)
 
     def new_project_key(self):
-        if len(self.projects.keys()) + 1 <10:
-            return 'P0' + str(len(self.projects.keys()) + 1)
+        if len(list(self.projects.keys())) + 1 <10:
+            return 'P0' + str(len(list(self.projects.keys())) + 1)
         else:
-            return 'P' + str(len(self.projects.keys()) + 1)
+            return 'P' + str(len(list(self.projects.keys())) + 1)
 
 
 class AboutPyDEF(tk.Toplevel):
@@ -814,9 +819,9 @@ class AboutPyDEF(tk.Toplevel):
         tk.Label(self.main_frame, image=self.mainwindow.logo_full_name_transp_bg, bg = 'white').grid(row=0, column=0, sticky='nsew')
         info_pane = tk.Frame(self.main_frame, bg='white')
         tk.Label(info_pane, text='version 64-bit', bg='white', padx=10).grid()
-        tk.Label(info_pane, text='Build date: March 2018', bg='white', padx=10).grid()
+        tk.Label(info_pane, text='Build date: April 2019', bg='white', padx=10).grid()
         info_pane.grid(row=0, column=1, sticky='nsew')
-        notebook = ttk.Notebook(master=self.main_frame)
+        notebook = tkinter.ttk.Notebook(master=self.main_frame)
         license_pane = tk.Frame(notebook)
         credits_pane = tk.Frame(notebook)
         developers = 'Developers: Adrien Stoliaroff'
@@ -834,7 +839,7 @@ class AboutPyDEF(tk.Toplevel):
         notebook.add(credits_pane, text='Credits')
         notebook.grid(sticky='nsew', columnspan=2)
 
-        tk.Button(self.main_frame, text='OK', command=self.destroy).grid(columnspan=2, sticky='e')
+        tk.ttk.Button(self.main_frame, text='OK', command=self.destroy).grid(columnspan=2, sticky='e')
 
 
 class SaveBeforeExitWindow(tk.Toplevel):
